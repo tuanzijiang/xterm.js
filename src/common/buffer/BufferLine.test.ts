@@ -162,7 +162,7 @@ describe('CellData', () => {
   it('serializes and deserializes plain cells', () => {
     const cell = CellData.fromCharData([123, 'a', 1, 'a'.charCodeAt(0)]);
     cell.bg = 456;
-    const serialized = JSON.parse(cell.toJSON());
+    const serialized = cell.toJSON();
 
     assert.deepEqual(serialized, {
       content: cell.content,
@@ -194,7 +194,7 @@ describe('CellData', () => {
     cell.extended.urlId = 99;
     cell.extended.underlineVariantOffset = 3;
     cell.updateExtended();
-    const serialized = JSON.parse(cell.toJSON());
+    const serialized = cell.toJSON();
 
     assert.deepEqual(serialized, {
       content: cell.content,
@@ -251,10 +251,10 @@ describe('BufferLine', function(): void {
     combined.updateExtended();
     line.setCell(1, combined);
 
-    const serialized = JSON.parse(line.toJSON());
+    const serialized = line.toJSON() as { isWrapped: boolean; cells: object[] };
     assert.equal(serialized.isWrapped, true);
     assert.lengthOf(serialized.cells, 3);
-    assert.deepEqual(JSON.parse(serialized.cells[1]), {
+    assert.deepEqual(serialized.cells[1], {
       content: combined.content,
       fg: combined.fg,
       bg: combined.bg,

@@ -88,6 +88,27 @@ export class Buffer implements IBuffer {
     return new BufferLine(this._bufferService.cols, this.getNullCell(attr), isWrapped);
   }
 
+  public getLength(): number {
+    return this.lines.length;
+  }
+
+  public getEffectiveLength(): number {
+    for (let i = this.lines.length - 1; i >= 0; i--) {
+      if (this.lines.get(i)?.translateToString(true) !== '') {
+        return i + 1;
+      }
+    }
+    return 0;
+  }
+
+  public getCursorLine(): IBufferLine | undefined {
+    return this.lines.get(this.ybase + this.y);
+  }
+
+  public getViewportBottomLine(): IBufferLine | undefined {
+    return this.lines.get(this.ydisp + this._rows - 1);
+  }
+
   public get hasScrollback(): boolean {
     return this._hasScrollback && this.lines.maxLength > this._rows;
   }

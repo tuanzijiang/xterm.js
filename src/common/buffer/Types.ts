@@ -32,6 +32,10 @@ export interface IBuffer {
   getBlankLine(attr: IAttributeData, isWrapped?: boolean): IBufferLine;
   getNullCell(attr?: IAttributeData): ICellData;
   getWhitespaceCell(attr?: IAttributeData): ICellData;
+  getLength(): number;
+  getEffectiveLength(): number;
+  getCursorLine(): IBufferLine | undefined;
+  getViewportBottomLine(): IBufferLine | undefined;
   addMarker(y: number): IMarker;
   clearMarkers(y: number): void;
   clearAllMarkers(): void;

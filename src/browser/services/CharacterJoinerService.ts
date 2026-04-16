@@ -3,7 +3,7 @@
  * @license MIT
  */
 
-import { IBufferLine, ICellData, CharData } from 'common/Types';
+import { IBufferLine, ICellData, CharData, JSONObject } from 'common/Types';
 import { ICharacterJoiner } from 'browser/Types';
 import { AttributeData } from 'common/buffer/AttributeData';
 import { WHITESPACE_CELL_CHAR, Content } from 'common/buffer/Constants';
@@ -11,7 +11,7 @@ import { CellData } from 'common/buffer/CellData';
 import { IBufferService } from 'common/services/Services';
 import { ICharacterJoinerService } from 'browser/services/Services';
 
-interface IJoinedCellDataJSON {
+interface IJoinedCellDataJSON extends JSONObject {
   fg: number;
   bg: number;
   combinedData: string;
@@ -62,8 +62,8 @@ export class JoinedCellData extends AttributeData implements ICellData {
     return [this.fg, this.getChars(), this.getWidth(), this.getCode()];
   }
 
-  public fromJSON(json: string): ICellData {
-    const data = JSON.parse(json) as IJoinedCellDataJSON;
+  public fromJSON(json: JSONObject): ICellData {
+    const data = json as IJoinedCellDataJSON;
     this.fg = data.fg;
     this.bg = data.bg;
     this.combinedData = data.combinedData;
@@ -71,13 +71,13 @@ export class JoinedCellData extends AttributeData implements ICellData {
     return this;
   }
 
-  public toJSON(): string {
-    return JSON.stringify({
+  public toJSON(): JSONObject {
+    return {
       fg: this.fg,
       bg: this.bg,
       combinedData: this.combinedData,
       width: this._width
-    } as IJoinedCellDataJSON);
+    } as IJoinedCellDataJSON;
   }
 }
 

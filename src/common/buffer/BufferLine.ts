@@ -3,7 +3,7 @@
  * @license MIT
  */
 
-import { CharData, IAttributeData, IBufferLine, ICellData, IExtendedAttrs } from 'common/Types';
+import { CharData, IAttributeData, IBufferLine, ICellData, IExtendedAttrs, JSONObject } from 'common/Types';
 import { AttributeData } from 'common/buffer/AttributeData';
 import { CellData } from 'common/buffer/CellData';
 import { Attributes, BgFlags, CHAR_DATA_ATTR_INDEX, CHAR_DATA_CHAR_INDEX, CHAR_DATA_WIDTH_INDEX, Content, NULL_CELL_CHAR, NULL_CELL_CODE, NULL_CELL_WIDTH, WHITESPACE_CELL_CHAR } from 'common/buffer/Constants';
@@ -37,9 +37,9 @@ const enum Cell {
 
 export const DEFAULT_ATTR_DATA = Object.freeze(new AttributeData());
 
-interface IBufferLineJSON {
+interface IBufferLineJSON extends JSONObject {
   isWrapped: boolean;
-  cells: string[];
+  cells: JSONObject[];
 }
 
 // Work variables to avoid garbage collection
@@ -463,8 +463,8 @@ export class BufferLine implements IBufferLine {
     return newLine;
   }
 
-  public fromJSON(json: string): IBufferLine {
-    const data = JSON.parse(json) as IBufferLineJSON;
+  public fromJSON(json: JSONObject): IBufferLine {
+    const data = json as IBufferLineJSON;
     this._data = new Uint32Array(data.cells.length * CELL_SIZE);
     this.length = data.cells.length;
     this.isWrapped = data.isWrapped;
@@ -476,16 +476,16 @@ export class BufferLine implements IBufferLine {
     return this;
   }
 
-  public toJSON(): string {
+  public toJSON(): JSONObject {
     const cell = new CellData();
-    const cells: string[] = [];
+    const cells: JSONObject[] = [];
     for (let i = 0; i < this.length; i++) {
       cells.push(this.loadCell(i, cell).toJSON());
     }
-    return JSON.stringify({
+    return {
       isWrapped: this.isWrapped,
       cells
-    } as IBufferLineJSON);
+    } as IBufferLineJSON;
   }
 
   public getTrimmedLength(): number {

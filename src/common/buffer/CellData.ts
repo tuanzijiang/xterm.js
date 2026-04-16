@@ -3,18 +3,19 @@
  * @license MIT
  */
 
-import { CharData, ICellData, IExtendedAttrs } from 'common/Types';
+import { CharData, ICellData, IExtendedAttrs, JSONObject, JSONValue } from 'common/Types';
 import { stringFromCodePoint } from 'common/input/TextDecoder';
 import { CHAR_DATA_CHAR_INDEX, CHAR_DATA_WIDTH_INDEX, CHAR_DATA_ATTR_INDEX, Content } from 'common/buffer/Constants';
 import { AttributeData, ExtendedAttrs } from 'common/buffer/AttributeData';
 
-interface ICellDataJSON {
+interface ICellDataJSON extends JSONObject {
   content: number;
   fg: number;
   bg: number;
   extended: {
     ext: number;
     urlId: number;
+    [key: string]: JSONValue;
   };
   combinedData: string;
 }
@@ -103,8 +104,8 @@ export class CellData extends AttributeData implements ICellData {
     return [this.fg, this.getChars(), this.getWidth(), this.getCode()];
   }
 
-  public fromJSON(json: string): CellData {
-    const data = JSON.parse(json) as ICellDataJSON;
+  public fromJSON(json: JSONObject): CellData {
+    const data = json as ICellDataJSON;
     this.content = data.content;
     this.fg = data.fg;
     this.bg = data.bg;
@@ -113,8 +114,8 @@ export class CellData extends AttributeData implements ICellData {
     return this;
   }
 
-  public toJSON(): string {
-    return JSON.stringify({
+  public toJSON(): JSONObject {
+    return {
       content: this.content,
       fg: this.fg,
       bg: this.bg,
@@ -123,6 +124,6 @@ export class CellData extends AttributeData implements ICellData {
         urlId: this.extended.urlId
       },
       combinedData: this.combinedData
-    } as ICellDataJSON);
+    } as ICellDataJSON;
   }
 }

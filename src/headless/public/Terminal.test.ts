@@ -306,6 +306,20 @@ describe('Headless API Tests', function (): void {
       strictEqual(term.buffer.active.length, 10);
     });
 
+    it('getLength, getEffectiveLength', async () => {
+      term = new Terminal({ rows: 5, allowProposedApi: true });
+      strictEqual(term.buffer.active.getLength(), 5);
+      strictEqual(term.buffer.active.getEffectiveLength(), 0);
+      await writeSync('foo');
+      strictEqual(term.buffer.active.getLength(), 5);
+      strictEqual(term.buffer.active.getEffectiveLength(), 1);
+      await writelnSync('');
+      await writelnSync('');
+      await writeSync('bar');
+      strictEqual(term.buffer.active.getLength(), 5);
+      strictEqual(term.buffer.active.getEffectiveLength(), 3);
+    });
+
     describe('getLine', () => {
       it('invalid index', async () => {
         term = new Terminal({ rows: 5, allowProposedApi: true });
@@ -354,6 +368,25 @@ describe('Headless API Tests', function (): void {
         strictEqual(term.buffer.active.getLine(0)!.getCell(2)!.getChars(), '');
         strictEqual(term.buffer.active.getLine(0)!.getCell(2)!.getWidth(), 0);
       });
+    });
+
+    it('getCursorLine, getViewportBottomLine', async () => {
+      term = new Terminal({ rows: 3, cols: 5, allowProposedApi: true });
+      strictEqual(term.buffer.active.getCursorLine()!.translateToString(true), '');
+      strictEqual(term.buffer.active.getViewportBottomLine()!.translateToString(true), '');
+      await writelnSync('foo');
+      await writelnSync('bar');
+      await writelnSync('baz');
+      await writeSync('qux');
+      strictEqual(term.buffer.active.cursorY, 2);
+      strictEqual(term.buffer.active.baseY, 1);
+      strictEqual(term.buffer.active.viewportY, 1);
+      strictEqual(term.buffer.active.getCursorLine()!.translateToString(true), 'qux');
+      strictEqual(term.buffer.active.getViewportBottomLine()!.translateToString(true), 'qux');
+      term.scrollToTop();
+      strictEqual(term.buffer.active.viewportY, 0);
+      strictEqual(term.buffer.active.getCursorLine()!.translateToString(true), 'qux');
+      strictEqual(term.buffer.active.getViewportBottomLine()!.translateToString(true), 'baz');
     });
 
     it('active, normal, alternate', async () => {

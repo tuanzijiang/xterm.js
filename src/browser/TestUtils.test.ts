@@ -252,6 +252,18 @@ export class MockBuffer implements IBuffer {
   public getBlankLine(attr: IAttributeData, isWrapped?: boolean): IBufferLine {
     return Buffer.prototype.getBlankLine.apply(this, arguments as any);
   }
+  public getLength(): number {
+    return Buffer.prototype.getLength.apply(this, arguments as any);
+  }
+  public getEffectiveLength(): number {
+    return Buffer.prototype.getEffectiveLength.apply(this, arguments as any);
+  }
+  public getCursorLine(): IBufferLine | undefined {
+    return Buffer.prototype.getCursorLine.apply(this, arguments as any);
+  }
+  public getViewportBottomLine(): IBufferLine | undefined {
+    return Buffer.prototype.getViewportBottomLine.apply(this, arguments as any);
+  }
   public getNullCell(attr?: IAttributeData): ICellData {
     throw new Error('Method not implemented.');
   }

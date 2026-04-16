@@ -999,6 +999,26 @@ declare module '@xterm/headless' {
     getLine(y: number): IBufferLine | undefined;
 
     /**
+     * Gets the total amount of lines currently in the buffer.
+     */
+    getLength(): number;
+
+    /**
+     * Gets the effective amount of lines, excluding trailing blank lines.
+     */
+    getEffectiveLength(): number;
+
+    /**
+     * Gets the line where the cursor is currently located.
+     */
+    getCursorLine(): IBufferLine | undefined;
+
+    /**
+     * Gets the bottom-most line in the current viewport.
+     */
+    getViewportBottomLine(): IBufferLine | undefined;
+
+    /**
      * Creates an empty cell object suitable as a cell reference in
      * `line.getCell(x, cell)`. Use this to avoid costly recreation of
      * cell objects when dealing with tons of cells.

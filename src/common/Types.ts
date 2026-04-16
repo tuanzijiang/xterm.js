@@ -109,6 +109,12 @@ export interface IColor {
 }
 export type IColorRGB = [number, number, number];
 
+export type JSONValue = string | number | boolean | null | JSONObject | JSONArray;
+export interface JSONObject {
+  [key: string]: JSONValue;
+}
+export interface JSONArray extends Array<JSONValue> {}
+
 export interface IExtendedAttrs {
   ext: number;
   underlineStyle: UnderlineStyle;
@@ -225,8 +231,8 @@ export interface ICellData extends IAttributeData, IBufferSerializable<ICellData
  * not a positional array whose meaning depends on field order.
  */
 export interface IBufferSerializable<T> {
-  fromJSON(json: string): T;
-  toJSON(): string;
+  fromJSON(json: JSONObject): T;
+  toJSON(): JSONObject;
 }
 
 /**

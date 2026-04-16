@@ -24,8 +24,24 @@ export class BufferApiView implements IBufferApi {
   public get viewportY(): number { return this._buffer.ydisp; }
   public get baseY(): number { return this._buffer.ybase; }
   public get length(): number { return this._buffer.lines.length; }
+  public getLength(): number { return this._buffer.getLength(); }
+  public getEffectiveLength(): number { return this._buffer.getEffectiveLength(); }
   public getLine(y: number): IBufferLineApi | undefined {
     const line = this._buffer.lines.get(y);
+    if (!line) {
+      return undefined;
+    }
+    return new BufferLineApiView(line);
+  }
+  public getCursorLine(): IBufferLineApi | undefined {
+    const line = this._buffer.getCursorLine();
+    if (!line) {
+      return undefined;
+    }
+    return new BufferLineApiView(line);
+  }
+  public getViewportBottomLine(): IBufferLineApi | undefined {
+    const line = this._buffer.getViewportBottomLine();
     if (!line) {
       return undefined;
     }

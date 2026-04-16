@@ -10,7 +10,7 @@ import { CursorBlinkStateManager } from './CursorBlinkStateManager';
 import { observeDevicePixelDimensions } from './DevicePixelObserver';
 import { IRenderDimensions, IRenderer, IRequestRedrawEvent } from 'browser/renderer/shared/Types';
 import { ICharSizeService, ICharacterJoinerService, ICoreBrowserService, IThemeService } from 'browser/services/Services';
-import { CharData, IBufferLine, ICellData } from 'common/Types';
+import { CharData, IBufferLine, ICellData, JSONObject } from 'common/Types';
 import { AttributeData } from 'common/buffer/AttributeData';
 import { CellData } from 'common/buffer/CellData';
 import { Attributes, Content, NULL_CELL_CHAR, NULL_CELL_CODE } from 'common/buffer/Constants';
@@ -628,7 +628,7 @@ export class WebglRenderer extends Disposable implements IRenderer {
   }
 }
 
-interface IJoinedCellDataJSON {
+interface IJoinedCellDataJSON extends JSONObject {
   fg: number;
   bg: number;
   combinedData: string;
@@ -680,8 +680,8 @@ export class JoinedCellData extends AttributeData implements ICellData {
     return [this.fg, this.getChars(), this.getWidth(), this.getCode()];
   }
 
-  public fromJSON(json: string): ICellData {
-    const data = JSON.parse(json) as IJoinedCellDataJSON;
+  public fromJSON(json: JSONObject): ICellData {
+    const data = json as IJoinedCellDataJSON;
     this.fg = data.fg;
     this.bg = data.bg;
     this.combinedData = data.combinedData;
@@ -689,13 +689,13 @@ export class JoinedCellData extends AttributeData implements ICellData {
     return this;
   }
 
-  public toJSON(): string {
-    return JSON.stringify({
+  public toJSON(): JSONObject {
+    return {
       fg: this.fg,
       bg: this.bg,
       combinedData: this.combinedData,
       width: this._width
-    } as IJoinedCellDataJSON);
+    } as IJoinedCellDataJSON;
   }
 }
 
