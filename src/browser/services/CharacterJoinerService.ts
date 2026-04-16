@@ -11,6 +11,13 @@ import { CellData } from 'common/buffer/CellData';
 import { IBufferService } from 'common/services/Services';
 import { ICharacterJoinerService } from 'browser/services/Services';
 
+interface IJoinedCellDataJSON {
+  fg: number;
+  bg: number;
+  combinedData: string;
+  width: number;
+}
+
 export class JoinedCellData extends AttributeData implements ICellData {
   private _width: number;
   // .content carries no meaning for joined CellData, simply nullify it
@@ -53,6 +60,24 @@ export class JoinedCellData extends AttributeData implements ICellData {
 
   public getAsCharData(): CharData {
     return [this.fg, this.getChars(), this.getWidth(), this.getCode()];
+  }
+
+  public fromJSON(json: string): ICellData {
+    const data = JSON.parse(json) as IJoinedCellDataJSON;
+    this.fg = data.fg;
+    this.bg = data.bg;
+    this.combinedData = data.combinedData;
+    this._width = data.width;
+    return this;
+  }
+
+  public toJSON(): string {
+    return JSON.stringify({
+      fg: this.fg,
+      bg: this.bg,
+      combinedData: this.combinedData,
+      width: this._width
+    } as IJoinedCellDataJSON);
   }
 }
 

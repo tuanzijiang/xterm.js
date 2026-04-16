@@ -3,7 +3,7 @@
  * @license MIT
  */
 
-import { CharData, IBufferSerializable, ICellData, IExtendedAttrs } from 'common/Types';
+import { CharData, ICellData, IExtendedAttrs } from 'common/Types';
 import { stringFromCodePoint } from 'common/input/TextDecoder';
 import { CHAR_DATA_CHAR_INDEX, CHAR_DATA_WIDTH_INDEX, CHAR_DATA_ATTR_INDEX, Content } from 'common/buffer/Constants';
 import { AttributeData, ExtendedAttrs } from 'common/buffer/AttributeData';
@@ -22,7 +22,7 @@ interface ICellDataJSON {
 /**
  * CellData - represents a single Cell in the terminal buffer.
  */
-export class CellData extends AttributeData implements ICellData, IBufferSerializable<CellData> {
+export class CellData extends AttributeData implements ICellData {
   /** Helper to create CellData from CharData. */
   public static fromCharData(value: CharData): CellData {
     const obj = new CellData();

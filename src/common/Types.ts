@@ -208,7 +208,7 @@ export interface IAttributeData {
 }
 
 /** Cell data */
-export interface ICellData extends IAttributeData {
+export interface ICellData extends IAttributeData, IBufferSerializable<ICellData> {
   content: number;
   combinedData: string;
   isCombined(): number;
