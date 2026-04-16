@@ -233,6 +233,7 @@ export interface ICellData extends IAttributeData, IBufferSerializable<ICellData
 export interface IBufferSerializable<T> {
   fromJSON(json: JSONObject): T;
   toJSON(): JSONObject;
+  toDisplayJSON(): JSONObject;
 }
 
 /**

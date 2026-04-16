@@ -488,6 +488,10 @@ export class BufferLine implements IBufferLine {
     } as IBufferLineJSON;
   }
 
+  public toDisplayJSON(): JSONObject {
+    return this.toJSON();
+  }
+
   public getTrimmedLength(): number {
     for (let i = this.length - 1; i >= 0; --i) {
       if ((this._data[i * CELL_SIZE + Cell.CONTENT] & Content.HAS_CONTENT_MASK)) {

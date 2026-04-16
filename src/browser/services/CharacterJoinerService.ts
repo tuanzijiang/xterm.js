@@ -79,6 +79,10 @@ export class JoinedCellData extends AttributeData implements ICellData {
       width: this._width
     } as IJoinedCellDataJSON;
   }
+
+  public toDisplayJSON(): JSONObject {
+    return this.toJSON();
+  }
 }
 
 export class CharacterJoinerService implements ICharacterJoinerService {

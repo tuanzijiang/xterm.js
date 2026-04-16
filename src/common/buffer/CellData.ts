@@ -10,13 +10,6 @@ import { AttributeData, ExtendedAttrs } from 'common/buffer/AttributeData';
 
 interface ICellDataJSON extends JSONObject {
   content: number;
-  _content: {
-    chars: string;
-    width: number;
-    code: number;
-    isCombined: boolean;
-    [key: string]: JSONValue;
-  };
   fg: number;
   bg: number;
   extended: {
@@ -124,12 +117,6 @@ export class CellData extends AttributeData implements ICellData {
   public toJSON(): JSONObject {
     return {
       content: this.content,
-      _content: {
-        chars: this.getChars(),
-        width: this.getWidth(),
-        code: this.getCode(),
-        isCombined: !!this.isCombined()
-      },
       fg: this.fg,
       bg: this.bg,
       extended: {
@@ -138,5 +125,14 @@ export class CellData extends AttributeData implements ICellData {
       },
       combinedData: this.combinedData
     } as ICellDataJSON;
+  }
+
+  public toDisplayJSON(): JSONObject {
+    return {
+      chars: this.getChars(),
+      width: this.getWidth(),
+      code: this.getCode(),
+      isCombined: !!this.isCombined()
+    };
   }
 }

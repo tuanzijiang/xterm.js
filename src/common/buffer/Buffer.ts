@@ -249,6 +249,10 @@ export class Buffer implements IBuffer {
     return serialized as unknown as JSONObject;
   }
 
+  public toDisplayJSON(): JSONObject {
+    return this.toJSON();
+  }
+
   /**
    * Gets the correct buffer length based on the rows provided, the terminal's
    * scrollback and whether this buffer is flagged to have scrollback or not.

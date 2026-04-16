@@ -697,6 +697,10 @@ export class JoinedCellData extends AttributeData implements ICellData {
       width: this._width
     } as IJoinedCellDataJSON;
   }
+
+  public toDisplayJSON(): JSONObject {
+    return this.toJSON();
+  }
 }
 
 function clamp(value: number, max: number, min: number = 0): number {

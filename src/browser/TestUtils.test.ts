@@ -240,6 +240,9 @@ export class MockBuffer implements IBuffer {
   public toJSON(): JSONObject {
     throw new Error('Method not implemented.');
   }
+  public toDisplayJSON(): JSONObject {
+    return this.toJSON();
+  }
   public translateBufferLineToString(lineIndex: number, trimRight: boolean, startCol?: number, endCol?: number): string {
     return Buffer.prototype.translateBufferLineToString.apply(this, arguments as any);
   }
