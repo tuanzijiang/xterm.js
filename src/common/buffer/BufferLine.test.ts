@@ -240,6 +240,38 @@ describe('BufferLine', function(): void {
     assert.deepEqual(line.loadCell(0, new CellData()).getAsCharData(), [123, 'a', 456, 'a'.charCodeAt(0)]);
     assert.equal(line.isWrapped, true);
   });
+
+  it('serializes and deserializes lines', () => {
+    const line = new TestBufferLine(3, undefined, true);
+    line.setCell(0, CellData.fromCharData([123, 'a', 1, 'a'.charCodeAt(0)]));
+    const combined = CellData.fromCharData([456, 'e\u0301', 1, '\u0301'.charCodeAt(0)]);
+    combined.bg = 789;
+    combined.extended.underlineStyle = UnderlineStyle.CURLY;
+    combined.extended.urlId = 77;
+    combined.updateExtended();
+    line.setCell(1, combined);
+
+    const serialized = JSON.parse(line.toJSON());
+    assert.equal(serialized.isWrapped, true);
+    assert.lengthOf(serialized.cells, 3);
+    assert.deepEqual(JSON.parse(serialized.cells[1]), {
+      content: combined.content,
+      fg: combined.fg,
+      bg: combined.bg,
+      extended: {
+        ext: combined.extended.ext,
+        urlId: combined.extended.urlId
+      },
+      combinedData: combined.combinedData
+    });
+
+    const restored = new TestBufferLine(0).fromJSON(line.toJSON());
+    assert.equal(restored.length, line.length);
+    assert.equal(restored.isWrapped, line.isWrapped);
+    assert.deepEqual(restored.loadCell(0, new CellData()).getAsCharData(), line.loadCell(0, new CellData()).getAsCharData());
+    assert.deepEqual(restored.loadCell(1, new CellData()).getAsCharData(), line.loadCell(1, new CellData()).getAsCharData());
+    assert.equal(restored.loadCell(1, new CellData()).extended.urlId, line.loadCell(1, new CellData()).extended.urlId);
+  });
   it('insertCells', function(): void {
     const line = new TestBufferLine(3);
     line.setCell(0, CellData.fromCharData([1, 'a', 0, 'a'.charCodeAt(0)]));

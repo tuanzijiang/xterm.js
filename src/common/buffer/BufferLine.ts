@@ -37,6 +37,11 @@ const enum Cell {
 
 export const DEFAULT_ATTR_DATA = Object.freeze(new AttributeData());
 
+interface IBufferLineJSON {
+  isWrapped: boolean;
+  cells: string[];
+}
+
 // Work variables to avoid garbage collection
 let $startIndex = 0;
 
@@ -456,6 +461,31 @@ export class BufferLine implements IBufferLine {
     }
     newLine.isWrapped = this.isWrapped;
     return newLine;
+  }
+
+  public fromJSON(json: string): IBufferLine {
+    const data = JSON.parse(json) as IBufferLineJSON;
+    this._data = new Uint32Array(data.cells.length * CELL_SIZE);
+    this.length = data.cells.length;
+    this.isWrapped = data.isWrapped;
+    this._extendedAttrs = {};
+    this._combined = {};
+    for (let i = 0; i < data.cells.length; i++) {
+      this.setCell(i, new CellData().fromJSON(data.cells[i]));
+    }
+    return this;
+  }
+
+  public toJSON(): string {
+    const cell = new CellData();
+    const cells: string[] = [];
+    for (let i = 0; i < this.length; i++) {
+      cells.push(this.loadCell(i, cell).toJSON());
+    }
+    return JSON.stringify({
+      isWrapped: this.isWrapped,
+      cells
+    } as IBufferLineJSON);
   }
 
   public getTrimmedLength(): number {

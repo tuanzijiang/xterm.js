@@ -232,7 +232,7 @@ export interface IBufferSerializable<T> {
 /**
  * Interface for a line in the terminal buffer.
  */
-export interface IBufferLine {
+export interface IBufferLine extends IBufferSerializable<IBufferLine> {
   length: number;
   isWrapped: boolean;
   get(index: number): CharData;
