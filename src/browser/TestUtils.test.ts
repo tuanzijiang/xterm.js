@@ -8,7 +8,7 @@ import { ICharacterJoinerService, ICharSizeService, ICoreBrowserService, IMouseS
 import { IRenderDimensions, IRenderer, IRequestRedrawEvent } from 'browser/renderer/shared/Types';
 import { IColorSet, ITerminal, ILinkifier2, IBrowser, IViewport, ICompositionHelper, CharacterJoinerHandler, IBufferRange, ReadonlyColorSet, IBufferElementProvider } from 'browser/Types';
 import { IBuffer, IBufferSet } from 'common/buffer/Types';
-import { IBufferLine, ICellData, IAttributeData, ICircularList, XtermListener, ICharset, ITerminalOptions, ColorIndex } from 'common/Types';
+import { IBufferLine, ICellData, IAttributeData, ICircularList, XtermListener, ICharset, ITerminalOptions, ColorIndex, JSONObject } from 'common/Types';
 import { Buffer } from 'common/buffer/Buffer';
 import * as Browser from 'common/Platform';
 import { CoreBrowserTerminal } from 'browser/CoreBrowserTerminal';
@@ -234,6 +234,12 @@ export class MockBuffer implements IBuffer {
   public savedX!: number;
   public savedCharset: ICharset | undefined;
   public savedCurAttrData = new AttributeData();
+  public fromJSON(json: JSONObject): IBuffer {
+    throw new Error('Method not implemented.');
+  }
+  public toJSON(): JSONObject {
+    throw new Error('Method not implemented.');
+  }
   public translateBufferLineToString(lineIndex: number, trimRight: boolean, startCol?: number, endCol?: number): string {
     return Buffer.prototype.translateBufferLineToString.apply(this, arguments as any);
   }

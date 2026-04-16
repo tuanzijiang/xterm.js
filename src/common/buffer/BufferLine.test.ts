@@ -166,6 +166,12 @@ describe('CellData', () => {
 
     assert.deepEqual(serialized, {
       content: cell.content,
+      _content: {
+        chars: cell.getChars(),
+        width: cell.getWidth(),
+        code: cell.getCode(),
+        isCombined: false
+      },
       fg: cell.fg,
       bg: cell.bg,
       extended: {
@@ -198,6 +204,12 @@ describe('CellData', () => {
 
     assert.deepEqual(serialized, {
       content: cell.content,
+      _content: {
+        chars: cell.getChars(),
+        width: cell.getWidth(),
+        code: cell.getCode(),
+        isCombined: true
+      },
       fg: cell.fg,
       bg: cell.bg,
       extended: {
@@ -256,6 +268,12 @@ describe('BufferLine', function(): void {
     assert.lengthOf(serialized.cells, 3);
     assert.deepEqual(serialized.cells[1], {
       content: combined.content,
+      _content: {
+        chars: combined.getChars(),
+        width: combined.getWidth(),
+        code: combined.getCode(),
+        isCombined: true
+      },
       fg: combined.fg,
       bg: combined.bg,
       extended: {

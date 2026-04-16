@@ -50,6 +50,49 @@ describe('Buffer', () => {
     });
   });
 
+  describe('serialization', () => {
+    it('should serialize and restore buffer state', () => {
+      buffer.fillViewportRows();
+      buffer.lines.get(0)!.setCell(0, CellData.fromCharData([1, 'A', 1, 'A'.charCodeAt(0)]));
+      buffer.lines.get(1)!.isWrapped = true;
+      buffer.ydisp = 3;
+      buffer.ybase = 5;
+      buffer.y = 7;
+      buffer.x = 11;
+      buffer.scrollTop = 2;
+      buffer.scrollBottom = 20;
+      buffer.savedY = 13;
+      buffer.savedX = 17;
+      buffer.savedCharset = { G0: 'A' };
+      buffer.savedCurAttrData.fg = 123;
+      buffer.savedCurAttrData.bg = 456;
+      buffer.savedCurAttrData.extended = new ExtendedAttrs(789, 42);
+      buffer.tabs = { 0: true, 8: true, 16: true };
+      buffer.addMarker(4);
+
+      const restored = new Buffer(true, optionsService, bufferService).fromJSON(buffer.toJSON()) as Buffer;
+
+      assert.equal(restored.lines.length, buffer.lines.length);
+      assert.deepEqual(restored.lines.get(0)!.loadCell(0, new CellData()).getAsCharData(), [1, 'A', 1, 'A'.charCodeAt(0)]);
+      assert.equal(restored.lines.get(1)!.isWrapped, true);
+      assert.equal(restored.ydisp, 3);
+      assert.equal(restored.ybase, 5);
+      assert.equal(restored.y, 7);
+      assert.equal(restored.x, 11);
+      assert.equal(restored.scrollTop, 2);
+      assert.equal(restored.scrollBottom, 20);
+      assert.equal(restored.savedY, 13);
+      assert.equal(restored.savedX, 17);
+      assert.deepEqual(restored.savedCharset, { G0: 'A' });
+      assert.equal(restored.savedCurAttrData.fg, 123);
+      assert.equal(restored.savedCurAttrData.bg, 456);
+      assert.equal(restored.savedCurAttrData.extended.ext, 789);
+      assert.equal(restored.savedCurAttrData.extended.urlId, 42);
+      assert.deepEqual(restored.tabs, { 0: true, 8: true, 16: true });
+      assert.equal(restored.markers.length, 0);
+    });
+  });
+
   describe('getWrappedRangeForLine', () => {
     describe('non-wrapped', () => {
       it('should return a single row for the first row', () => {

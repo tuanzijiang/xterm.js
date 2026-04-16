@@ -5,7 +5,7 @@
 
 import { CircularList, IInsertEvent } from 'common/CircularList';
 import { IdleTaskQueue } from 'common/TaskQueue';
-import { IAttributeData, IBufferLine, ICellData, ICharset } from 'common/Types';
+import { IAttributeData, IBufferLine, ICellData, ICharset, JSONObject } from 'common/Types';
 import { ExtendedAttrs } from 'common/buffer/AttributeData';
 import { BufferLine, DEFAULT_ATTR_DATA } from 'common/buffer/BufferLine';
 import { getWrappedLineTrimmedLength, reflowLargerApplyNewLayout, reflowLargerCreateNewLayout, reflowLargerGetLinesToRemove, reflowSmallerGetNewLineLengths } from 'common/buffer/BufferReflow';
@@ -17,6 +17,61 @@ import { DEFAULT_CHARSET } from 'common/data/Charsets';
 import { IBufferService, IOptionsService } from 'common/services/Services';
 
 export const MAX_BUFFER_SIZE = 4294967295; // 2^32 - 1
+
+interface ISerializedAttributeData {
+  fg: number;
+  bg: number;
+  extended: {
+    ext: number;
+    urlId: number;
+  };
+}
+
+interface IBufferJSON {
+  hasScrollback: boolean;
+  cols: number;
+  rows: number;
+  ydisp: number;
+  ybase: number;
+  y: number;
+  x: number;
+  tabs: JSONObject;
+  scrollBottom: number;
+  scrollTop: number;
+  savedY: number;
+  savedX: number;
+  savedCharset?: JSONObject;
+  savedCurAttrData: ISerializedAttributeData;
+  lines: JSONObject[];
+}
+
+function serializeCharset(charset: ICharset | undefined): JSONObject | undefined {
+  if (!charset) {
+    return undefined;
+  }
+  const result: JSONObject = {};
+  for (const key of Object.keys(charset)) {
+    const value = charset[key];
+    if (value !== undefined) {
+      result[key] = value;
+    }
+  }
+  return result;
+}
+
+function deserializeCharset(json: JSONObject | undefined): ICharset | undefined {
+  if (!json) {
+    return undefined;
+  }
+  const result: ICharset = {};
+  for (const key of Object.keys(json)) {
+    const value = json[key];
+    if (typeof value === 'string') {
+      result[key] = value;
+    }
+  }
+  return result;
+}
 
 /**
  * This class represents a terminal buffer (an internal state of the terminal), where the
@@ -117,6 +172,81 @@ export class Buffer implements IBuffer {
     const absoluteY = this.ybase + this.y;
     const relativeY = absoluteY - this.ydisp;
     return (relativeY >= 0 && relativeY < this._rows);
+  }
+
+  public fromJSON(json: JSONObject): IBuffer {
+    const data = json as unknown as IBufferJSON;
+    this._hasScrollback = data.hasScrollback;
+    this._cols = data.cols;
+    this._rows = data.rows;
+    this.ydisp = data.ydisp;
+    this.ybase = data.ybase;
+    this.y = data.y;
+    this.x = data.x;
+    this.tabs = {};
+    for (const key of Object.keys(data.tabs)) {
+      if (data.tabs[key] === true) {
+        this.tabs[Number(key)] = true;
+      }
+    }
+    this.scrollBottom = data.scrollBottom;
+    this.scrollTop = data.scrollTop;
+    this.savedY = data.savedY;
+    this.savedX = data.savedX;
+    this.savedCharset = deserializeCharset(data.savedCharset);
+    this.savedCurAttrData.fg = data.savedCurAttrData.fg;
+    this.savedCurAttrData.bg = data.savedCurAttrData.bg;
+    this.savedCurAttrData.extended = new ExtendedAttrs(
+      data.savedCurAttrData.extended.ext,
+      data.savedCurAttrData.extended.urlId
+    );
+    this.lines = new CircularList<IBufferLine>(this._getCorrectBufferLength(this._rows));
+    for (const line of data.lines) {
+      this.lines.push(new BufferLine(0).fromJSON(line));
+    }
+    this.markers = [];
+    return this;
+  }
+
+  public toJSON(): JSONObject {
+    const lines: JSONObject[] = [];
+    for (let i = 0; i < this.lines.length; i++) {
+      lines.push(this.lines.get(i)!.toJSON());
+    }
+    const tabs: JSONObject = {};
+    for (const key of Object.keys(this.tabs)) {
+      if (this.tabs[Number(key)]) {
+        tabs[key] = true;
+      }
+    }
+    const serialized: IBufferJSON = {
+      hasScrollback: this._hasScrollback,
+      cols: this._cols,
+      rows: this._rows,
+      ydisp: this.ydisp,
+      ybase: this.ybase,
+      y: this.y,
+      x: this.x,
+      tabs,
+      scrollBottom: this.scrollBottom,
+      scrollTop: this.scrollTop,
+      savedY: this.savedY,
+      savedX: this.savedX,
+      savedCurAttrData: {
+        fg: this.savedCurAttrData.fg,
+        bg: this.savedCurAttrData.bg,
+        extended: {
+          ext: this.savedCurAttrData.extended.ext,
+          urlId: this.savedCurAttrData.extended.urlId
+        }
+      },
+      lines
+    };
+    const savedCharset = serializeCharset(this.savedCharset);
+    if (savedCharset) {
+      serialized.savedCharset = savedCharset;
+    }
+    return serialized as unknown as JSONObject;
   }
 
   /**
