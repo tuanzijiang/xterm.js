@@ -158,6 +158,68 @@ describe('CellData', () => {
     assert.deepEqual(cell.getAsCharData(), [123, '１', 2, '１'.charCodeAt(0)]);
     assert.equal(cell.isCombined(), 0);
   });
+
+  it('serializes and deserializes plain cells', () => {
+    const cell = CellData.fromCharData([123, 'a', 1, 'a'.charCodeAt(0)]);
+    cell.bg = 456;
+    const serialized = JSON.parse(cell.toJSON());
+
+    assert.deepEqual(serialized, {
+      content: cell.content,
+      fg: cell.fg,
+      bg: cell.bg,
+      extended: {
+        ext: cell.extended.ext,
+        urlId: cell.extended.urlId
+      },
+      combinedData: cell.combinedData
+    });
+
+    const restored = new CellData().fromJSON(cell.toJSON());
+
+    assert.equal(restored.content, cell.content);
+    assert.equal(restored.fg, cell.fg);
+    assert.equal(restored.bg, cell.bg);
+    assert.equal(restored.extended.ext, cell.extended.ext);
+    assert.equal(restored.extended.urlId, cell.extended.urlId);
+    assert.equal(restored.combinedData, cell.combinedData);
+    assert.deepEqual(restored.getAsCharData(), cell.getAsCharData());
+  });
+
+  it('serializes and deserializes combined cells with extended attrs', () => {
+    const cell = CellData.fromCharData([123, 'e\u0301', 1, '\u0301'.charCodeAt(0)]);
+    cell.bg = 456;
+    cell.extended.underlineStyle = UnderlineStyle.CURLY;
+    cell.extended.underlineColor = Attributes.CM_RGB | (1 << 16) | (2 << 8) | 3;
+    cell.extended.urlId = 99;
+    cell.extended.underlineVariantOffset = 3;
+    cell.updateExtended();
+    const serialized = JSON.parse(cell.toJSON());
+
+    assert.deepEqual(serialized, {
+      content: cell.content,
+      fg: cell.fg,
+      bg: cell.bg,
+      extended: {
+        ext: cell.extended.ext,
+        urlId: cell.extended.urlId
+      },
+      combinedData: cell.combinedData
+    });
+
+    const restored = new CellData().fromJSON(cell.toJSON());
+
+    assert.equal(restored.content, cell.content);
+    assert.equal(restored.fg, cell.fg);
+    assert.equal(restored.bg, cell.bg);
+    assert.equal(restored.extended.ext, cell.extended.ext);
+    assert.equal(restored.extended.urlId, cell.extended.urlId);
+    assert.equal(restored.combinedData, cell.combinedData);
+    assert.equal(restored.getUnderlineStyle(), cell.getUnderlineStyle());
+    assert.equal(restored.getUnderlineColor(), cell.getUnderlineColor());
+    assert.equal(restored.getUnderlineVariantOffset(), cell.getUnderlineVariantOffset());
+    assert.deepEqual(restored.getAsCharData(), cell.getAsCharData());
+  });
 });
 
 describe('BufferLine', function(): void {

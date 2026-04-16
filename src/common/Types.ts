@@ -220,6 +220,16 @@ export interface ICellData extends IAttributeData {
 }
 
 /**
+ * Buffer serialization contract.
+ * Serialized JSON must represent a semantically meaningful object with named fields,
+ * not a positional array whose meaning depends on field order.
+ */
+export interface IBufferSerializable<T> {
+  fromJSON(json: string): T;
+  toJSON(): string;
+}
+
+/**
  * Interface for a line in the terminal buffer.
  */
 export interface IBufferLine {

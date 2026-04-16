@@ -3,15 +3,26 @@
  * @license MIT
  */
 
-import { CharData, ICellData, IExtendedAttrs } from 'common/Types';
+import { CharData, IBufferSerializable, ICellData, IExtendedAttrs } from 'common/Types';
 import { stringFromCodePoint } from 'common/input/TextDecoder';
 import { CHAR_DATA_CHAR_INDEX, CHAR_DATA_WIDTH_INDEX, CHAR_DATA_ATTR_INDEX, Content } from 'common/buffer/Constants';
 import { AttributeData, ExtendedAttrs } from 'common/buffer/AttributeData';
 
+interface ICellDataJSON {
+  content: number;
+  fg: number;
+  bg: number;
+  extended: {
+    ext: number;
+    urlId: number;
+  };
+  combinedData: string;
+}
+
 /**
  * CellData - represents a single Cell in the terminal buffer.
  */
-export class CellData extends AttributeData implements ICellData {
+export class CellData extends AttributeData implements ICellData, IBufferSerializable<CellData> {
   /** Helper to create CellData from CharData. */
   public static fromCharData(value: CharData): CellData {
     const obj = new CellData();
@@ -90,5 +101,28 @@ export class CellData extends AttributeData implements ICellData {
   /** Get data as CharData. */
   public getAsCharData(): CharData {
     return [this.fg, this.getChars(), this.getWidth(), this.getCode()];
+  }
+
+  public fromJSON(json: string): CellData {
+    const data = JSON.parse(json) as ICellDataJSON;
+    this.content = data.content;
+    this.fg = data.fg;
+    this.bg = data.bg;
+    this.extended = new ExtendedAttrs(data.extended.ext, data.extended.urlId);
+    this.combinedData = data.combinedData;
+    return this;
+  }
+
+  public toJSON(): string {
+    return JSON.stringify({
+      content: this.content,
+      fg: this.fg,
+      bg: this.bg,
+      extended: {
+        ext: this.extended.ext,
+        urlId: this.extended.urlId
+      },
+      combinedData: this.combinedData
+    } as ICellDataJSON);
   }
 }
