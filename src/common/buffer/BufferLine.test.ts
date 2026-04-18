@@ -290,6 +290,26 @@ describe('BufferLine', function(): void {
     assert.deepEqual(restored.loadCell(1, new CellData()).getAsCharData(), line.loadCell(1, new CellData()).getAsCharData());
     assert.equal(restored.loadCell(1, new CellData()).extended.urlId, line.loadCell(1, new CellData()).extended.urlId);
   });
+
+  it('serializes display lines as full-row content', () => {
+    const line = new TestBufferLine(5, undefined, true);
+    line.setCell(0, CellData.fromCharData([123, 'a', 1, 'a'.charCodeAt(0)]));
+    line.setCell(1, CellData.fromCharData([456, 'e\u0301', 1, '\u0301'.charCodeAt(0)]));
+    line.setCell(2, CellData.fromCharData([789, '１', 2, '１'.charCodeAt(0)]));
+    line.setCell(3, CellData.fromCharData([0, '', 0, 0]));
+
+    const display = line.toDisplayJSON() as {
+      isWrapped: boolean;
+      cells: Array<{ chars: string; width: number }>;
+    };
+
+    assert.equal(display.isWrapped, true);
+    assert.deepEqual(display.cells, [{
+      chars: 'ae\u0301１ ',
+      width: 5
+    }]);
+  });
+
   it('insertCells', function(): void {
     const line = new TestBufferLine(3);
     line.setCell(0, CellData.fromCharData([1, 'a', 0, 'a'.charCodeAt(0)]));

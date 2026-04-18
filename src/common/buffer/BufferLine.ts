@@ -42,6 +42,13 @@ interface IBufferLineJSON extends JSONObject {
   cells: JSONObject[];
 }
 
+interface ICellDisplayJSON extends JSONObject {
+  chars: string;
+  width: number;
+  code: number;
+  isCombined: boolean;
+}
+
 // Work variables to avoid garbage collection
 let $startIndex = 0;
 
@@ -489,7 +496,29 @@ export class BufferLine implements IBufferLine {
   }
 
   public toDisplayJSON(): JSONObject {
-    return this.toJSON();
+    const data = this.toJSON() as IBufferLineJSON;
+    let chars = '';
+    let width = 0;
+    const cell = new CellData();
+    for (let i = 0; i < this.length; i++) {
+      const displayCell = this.loadCell(i, cell).toDisplayJSON();
+      const { width: displayCellWidth, chars: displayCellChars } = displayCell;
+
+      if (displayCellWidth === 0) {
+        continue;
+      }
+
+      chars += displayCellChars || WHITESPACE_CELL_CHAR.repeat(displayCellWidth as number);
+      width += (displayCellWidth as number);
+    }
+
+    return {
+      isWrapped: data.isWrapped,
+      cells: [{
+        chars,
+        width
+      }]
+    };
   }
 
   public getTrimmedLength(): number {
