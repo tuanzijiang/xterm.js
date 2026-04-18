@@ -125,6 +125,57 @@ export interface IExtendedAttrs {
   isEmpty(): boolean;
 }
 
+export interface IExtendedAttrsJSONObj extends JSONObject {
+  ext: number;
+  urlId: number;
+}
+
+export interface ICellDataJSONObj extends JSONObject {
+  content: number;
+  fg: number;
+  bg: number;
+  extended: IExtendedAttrsJSONObj;
+  combinedData: string;
+}
+
+export interface IJoinedCellDataJSONObj extends JSONObject {
+  fg: number;
+  bg: number;
+  combinedData: string;
+  width: number;
+}
+
+export type ICellDataJSON = ICellDataJSONObj | IJoinedCellDataJSONObj;
+
+export interface IBufferLineJSONObj extends JSONObject {
+  isWrapped: boolean;
+  cells: ICellDataJSONObj[];
+}
+
+export interface ISerializedAttributeDataJSONObj extends JSONObject {
+  fg: number;
+  bg: number;
+  extended: IExtendedAttrsJSONObj;
+}
+
+export interface IBufferJSONObj extends JSONObject {
+  hasScrollback: boolean;
+  cols: number;
+  rows: number;
+  ydisp: number;
+  ybase: number;
+  y: number;
+  x: number;
+  tabs: JSONObject;
+  scrollBottom: number;
+  scrollTop: number;
+  savedY: number;
+  savedX: number;
+  savedCharset: JSONObject | null;
+  savedCurAttrData: ISerializedAttributeDataJSONObj;
+  lines: IBufferLineJSONObj[];
+}
+
 /**
  * Tracks the current hyperlink. Since these are treated as extended attirbutes, these get passed on
  * to the linkifier when anything is printed. Doing it this way ensures that even when the cursor
@@ -215,7 +266,7 @@ export interface IAttributeData {
 
 
 /** Cell data */
-export interface ICellData extends IAttributeData, ISerializable {
+export interface ICellData extends IAttributeData, ISerializable<ICellDataJSON> {
   content: number;
   combinedData: string;
   isCombined(): number;
@@ -232,15 +283,15 @@ export interface ICellData extends IAttributeData, ISerializable {
  * Serialized JSON must represent a semantically meaningful object with named fields,
  * not a positional array whose meaning depends on field order.
  */
-export interface ISerializable {
-  fromJSON(json: JSONObject): this;
-  toJSON(): JSONObject;
+export interface ISerializable<T extends JSONObject> {
+  fromJSON(json: T): this;
+  toJSON(): T;
 }
 
 /**
  * Interface for a line in the terminal buffer.
  */
-export interface IBufferLine extends ISerializable {
+export interface IBufferLine extends ISerializable<IBufferLineJSONObj> {
   length: number;
   isWrapped: boolean;
   get(index: number): CharData;

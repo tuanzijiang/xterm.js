@@ -3,13 +3,13 @@
  * @license MIT
  */
 
-import { IAttributeData, ICircularList, IBufferLine, ISerializable, ICellData, IMarker, ICharset, IDisposable } from 'common/Types';
+import { IAttributeData, IBufferJSONObj, ICircularList, IBufferLine, ISerializable, ICellData, IMarker, ICharset, IDisposable } from 'common/Types';
 import type { Event } from 'vs/base/common/event';
 
 // BufferIndex denotes a position in the buffer: [rowIndex, colIndex]
 export type BufferIndex = [number, number];
 
-export interface IBuffer extends ISerializable {
+export interface IBuffer extends ISerializable<IBufferJSONObj> {
   readonly lines: ICircularList<IBufferLine>;
   ydisp: number;
   ybase: number;

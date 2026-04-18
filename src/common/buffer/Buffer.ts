@@ -5,7 +5,7 @@
 
 import { CircularList, IInsertEvent } from 'common/CircularList';
 import { IdleTaskQueue } from 'common/TaskQueue';
-import { IAttributeData, IBufferLine, ICellData, ICharset, JSONObject } from 'common/Types';
+import { IAttributeData, IBufferJSONObj, IBufferLine, ICellData, ICharset, JSONObject } from 'common/Types';
 import { ExtendedAttrs } from 'common/buffer/AttributeData';
 import { BufferLine, DEFAULT_ATTR_DATA } from 'common/buffer/BufferLine';
 import { getWrappedLineTrimmedLength, reflowLargerApplyNewLayout, reflowLargerCreateNewLayout, reflowLargerGetLinesToRemove, reflowSmallerGetNewLineLengths } from 'common/buffer/BufferReflow';
@@ -17,33 +17,6 @@ import { DEFAULT_CHARSET } from 'common/data/Charsets';
 import { IBufferService, IOptionsService } from 'common/services/Services';
 
 export const MAX_BUFFER_SIZE = 4294967295; // 2^32 - 1
-
-interface ISerializedAttributeData {
-  fg: number;
-  bg: number;
-  extended: {
-    ext: number;
-    urlId: number;
-  };
-}
-
-interface IBufferJSON {
-  hasScrollback: boolean;
-  cols: number;
-  rows: number;
-  ydisp: number;
-  ybase: number;
-  y: number;
-  x: number;
-  tabs: JSONObject;
-  scrollBottom: number;
-  scrollTop: number;
-  savedY: number;
-  savedX: number;
-  savedCharset?: JSONObject;
-  savedCurAttrData: ISerializedAttributeData;
-  lines: JSONObject[];
-}
 
 function serializeCharset(charset: ICharset | undefined): JSONObject | undefined {
   if (!charset) {
@@ -59,7 +32,7 @@ function serializeCharset(charset: ICharset | undefined): JSONObject | undefined
   return result;
 }
 
-function deserializeCharset(json: JSONObject | undefined): ICharset | undefined {
+function deserializeCharset(json: JSONObject | null | undefined): ICharset | undefined {
   if (!json) {
     return undefined;
   }
@@ -174,8 +147,8 @@ export class Buffer implements IBuffer {
     return (relativeY >= 0 && relativeY < this._rows);
   }
 
-  public fromJSON(json: JSONObject): this {
-    const data = json as unknown as IBufferJSON;
+  public fromJSON(json: IBufferJSONObj): this {
+    const data = json;
     this._hasScrollback = data.hasScrollback;
     this._cols = data.cols;
     this._rows = data.rows;
@@ -208,8 +181,8 @@ export class Buffer implements IBuffer {
     return this;
   }
 
-  public toJSON(): JSONObject {
-    const lines: JSONObject[] = [];
+  public toJSON(): IBufferJSONObj {
+    const lines: IBufferJSONObj['lines'] = [];
     for (let i = 0; i < this.lines.length; i++) {
       lines.push(this.lines.get(i)!.toJSON());
     }
@@ -219,7 +192,8 @@ export class Buffer implements IBuffer {
         tabs[key] = true;
       }
     }
-    const serialized: IBufferJSON = {
+    const savedCharset = serializeCharset(this.savedCharset);
+    const serialized: IBufferJSONObj = {
       hasScrollback: this._hasScrollback,
       cols: this._cols,
       rows: this._rows,
@@ -232,6 +206,7 @@ export class Buffer implements IBuffer {
       scrollTop: this.scrollTop,
       savedY: this.savedY,
       savedX: this.savedX,
+      savedCharset: savedCharset ?? null,
       savedCurAttrData: {
         fg: this.savedCurAttrData.fg,
         bg: this.savedCurAttrData.bg,
@@ -242,11 +217,7 @@ export class Buffer implements IBuffer {
       },
       lines
     };
-    const savedCharset = serializeCharset(this.savedCharset);
-    if (savedCharset) {
-      serialized.savedCharset = savedCharset;
-    }
-    return serialized as unknown as JSONObject;
+    return serialized;
   }
 
   public toDisplayJSON(): JSONObject {

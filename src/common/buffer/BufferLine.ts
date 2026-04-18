@@ -3,7 +3,7 @@
  * @license MIT
  */
 
-import { CharData, IAttributeData, IBufferLine, ICellData, IExtendedAttrs, JSONObject } from 'common/Types';
+import { CharData, IAttributeData, IBufferLine, IBufferLineJSONObj, ICellData, ICellDataJSONObj, IExtendedAttrs, JSONObject } from 'common/Types';
 import { AttributeData } from 'common/buffer/AttributeData';
 import { CellData } from 'common/buffer/CellData';
 import { Attributes, BgFlags, CHAR_DATA_ATTR_INDEX, CHAR_DATA_CHAR_INDEX, CHAR_DATA_WIDTH_INDEX, Content, NULL_CELL_CHAR, NULL_CELL_CODE, NULL_CELL_WIDTH, WHITESPACE_CELL_CHAR } from 'common/buffer/Constants';
@@ -36,11 +36,6 @@ const enum Cell {
 }
 
 export const DEFAULT_ATTR_DATA = Object.freeze(new AttributeData());
-
-interface IBufferLineJSON extends JSONObject {
-  isWrapped: boolean;
-  cells: JSONObject[];
-}
 
 interface ICellDisplayJSON extends JSONObject {
   chars: string;
@@ -470,33 +465,34 @@ export class BufferLine implements IBufferLine {
     return newLine;
   }
 
-  public fromJSON(json: JSONObject): this {
-    const data = json as IBufferLineJSON;
+  public fromJSON(json: IBufferLineJSONObj): this {
+    const data = json;
     this._data = new Uint32Array(data.cells.length * CELL_SIZE);
     this.length = data.cells.length;
     this.isWrapped = data.isWrapped;
     this._extendedAttrs = {};
     this._combined = {};
     for (let i = 0; i < data.cells.length; i++) {
-      this.setCell(i, new CellData().fromJSON(data.cells[i]));
+      this.setCell(i, new CellData().fromJSON(data.cells[i] as ICellDataJSONObj));
     }
     return this;
   }
 
-  public toJSON(): JSONObject {
+  public toJSON(): IBufferLineJSONObj {
     const cell = new CellData();
-    const cells: JSONObject[] = [];
+    const cells: IBufferLineJSONObj['cells'] = [];
     for (let i = 0; i < this.length; i++) {
-      cells.push(this.loadCell(i, cell).toJSON());
+      this.loadCell(i, cell);
+      cells.push(cell.toJSON());
     }
     return {
       isWrapped: this.isWrapped,
       cells
-    } as IBufferLineJSON;
+    };
   }
 
   public toDisplayJSON(): JSONObject {
-    const data = this.toJSON() as IBufferLineJSON;
+    const data = this.toJSON() as IBufferLineJSONObj;
     let chars = '';
     let width = 0;
     const cell = new CellData();

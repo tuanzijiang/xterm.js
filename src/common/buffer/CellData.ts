@@ -3,22 +3,10 @@
  * @license MIT
  */
 
-import { CharData, ICellData, IExtendedAttrs, JSONObject, JSONValue } from 'common/Types';
+import { CharData, ICellData, ICellDataJSONObj, IExtendedAttrs, JSONObject } from 'common/Types';
 import { stringFromCodePoint } from 'common/input/TextDecoder';
 import { CHAR_DATA_CHAR_INDEX, CHAR_DATA_WIDTH_INDEX, CHAR_DATA_ATTR_INDEX, Content } from 'common/buffer/Constants';
 import { AttributeData, ExtendedAttrs } from 'common/buffer/AttributeData';
-
-interface ICellDataJSON extends JSONObject {
-  content: number;
-  fg: number;
-  bg: number;
-  extended: {
-    ext: number;
-    urlId: number;
-    [key: string]: JSONValue;
-  };
-  combinedData: string;
-}
 
 /**
  * CellData - represents a single Cell in the terminal buffer.
@@ -104,8 +92,8 @@ export class CellData extends AttributeData implements ICellData {
     return [this.fg, this.getChars(), this.getWidth(), this.getCode()];
   }
 
-  public fromJSON(json: JSONObject): this {
-    const data = json as ICellDataJSON;
+  public fromJSON(json: ICellDataJSONObj): this {
+    const data = json;
     this.content = data.content;
     this.fg = data.fg;
     this.bg = data.bg;
@@ -114,7 +102,7 @@ export class CellData extends AttributeData implements ICellData {
     return this;
   }
 
-  public toJSON(): JSONObject {
+  public toJSON(): ICellDataJSONObj {
     return {
       content: this.content,
       fg: this.fg,
@@ -124,7 +112,7 @@ export class CellData extends AttributeData implements ICellData {
         urlId: this.extended.urlId
       },
       combinedData: this.combinedData
-    } as ICellDataJSON;
+    };
   }
 
   public toDisplayJSON(): JSONObject {
