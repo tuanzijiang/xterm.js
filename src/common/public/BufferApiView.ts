@@ -3,8 +3,9 @@
  * @license MIT
  */
 
-import { IBuffer as IBufferApi, IBufferLine as IBufferLineApi, IBufferCell as IBufferCellApi } from '@xterm/xterm';
+import { IBuffer as IBufferApi, IBufferCell as IBufferCellApi, IBufferJSONObj, IBufferLine as IBufferLineApi } from '@xterm/xterm';
 import { IBuffer } from 'common/buffer/Types';
+import { IBufferJSONObj as ICoreBufferJSONObj } from 'common/Types';
 import { BufferLineApiView } from 'common/public/BufferLineApiView';
 import { CellData } from 'common/buffer/CellData';
 
@@ -48,4 +49,11 @@ export class BufferApiView implements IBufferApi {
     return new BufferLineApiView(line);
   }
   public getNullCell(): IBufferCellApi { return new CellData(); }
+  public fromJSON(data: IBufferJSONObj): IBufferApi {
+    this._buffer.fromJSON(data as unknown as ICoreBufferJSONObj);
+    return this;
+  }
+  public toJSON(): IBufferJSONObj {
+    return this._buffer.toJSON() as unknown as IBufferJSONObj;
+  }
 }

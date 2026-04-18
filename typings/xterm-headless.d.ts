@@ -89,6 +89,16 @@ declare module '@xterm/headless' {
     fastScrollModifier?: 'none' | 'alt' | 'ctrl' | 'shift';
 
     /**
+     * The font size used to render text.
+     */
+    fontSize?: number;
+
+    /**
+     * The font family used to render text.
+     */
+    fontFamily?: string;
+
+    /**
      * The spacing in whole pixels between characters.
      */
     letterSpacing?: number;
@@ -596,6 +606,55 @@ declare module '@xterm/headless' {
     setWinLines?: boolean;
   }
 
+  export interface ICanvasTextMetrics {
+    width: number;
+    actualBoundingBoxAscent?: number;
+    actualBoundingBoxDescent?: number;
+    fontBoundingBoxAscent?: number;
+    fontBoundingBoxDescent?: number;
+  }
+
+  export interface ICanvasRenderingContext2D {
+    fillStyle: unknown;
+    strokeStyle: unknown;
+    font: string;
+    textBaseline: string;
+    lineWidth: number;
+    globalAlpha: number;
+    fillRect(x: number, y: number, width: number, height: number): void;
+    fillText(text: string, x: number, y: number): void;
+    measureText(text: string): ICanvasTextMetrics;
+    save(): void;
+    restore(): void;
+    beginPath(): void;
+    moveTo(x: number, y: number): void;
+    lineTo(x: number, y: number): void;
+    stroke(): void;
+  }
+
+  export interface ICanvasSurface {
+    getContext(contextId: '2d'): ICanvasRenderingContext2D | null;
+    toBuffer(mimeType?: 'image/png'): Uint8Array;
+  }
+
+  export interface ICanvasFactory {
+    createCanvas(width: number, height: number): ICanvasSurface;
+  }
+
+  export interface Logger {
+    info(...args: unknown[]): void;
+    error(...args: unknown[]): void;
+  }
+
+  export interface ITerminalToPNGOptions {
+    canvasFactory?: ICanvasFactory;
+    includeCursor?: boolean;
+    logger?: Logger;
+    padding?: number;
+    viewportStartLine?: number;
+    viewportRows?: number;
+  }
+
   /**
    * The class that represents an xterm.js terminal.
    */
@@ -763,6 +822,13 @@ declare module '@xterm/headless' {
     onTitleChange: IEvent<string>;
 
     /**
+     * (EXPERIMENTAL) Adds an event listener for when the active buffer content
+     * changes and provides the latest active buffer snapshot.
+     * @returns an `IDisposable` to stop listening.
+     */
+    onBufferChange: IEvent<IBuffer>;
+
+    /**
      * Input data to application side. The data is treated the same way input
      * typed into the terminal would (ie. the {@link onData} event will fire).
      * @param data The data to forward to the application.
@@ -830,6 +896,12 @@ declare module '@xterm/headless' {
      * Clear the entire buffer, making the prompt line the new first line.
      */
     clear(): void;
+
+    /**
+     * Renders the current viewport to a PNG image buffer. By default this uses
+     * `@napi-rs/canvas`.
+     */
+    toPNG(options?: ITerminalToPNGOptions): Promise<Uint8Array>;
 
     /**
      * Write data to the terminal.
@@ -949,6 +1021,63 @@ declare module '@xterm/headless' {
   }
 
   /**
+   * The serialized form of extended cell attributes.
+   */
+  export interface IExtendedAttrsJSONObj {
+    ext: number;
+    urlId: number;
+  }
+
+  /**
+   * The serialized form of a buffer cell.
+   */
+  export interface ICellDataJSONObj {
+    content: number;
+    fg: number;
+    bg: number;
+    extended: IExtendedAttrsJSONObj;
+    combinedData: string;
+  }
+
+  /**
+   * The serialized form of a buffer line.
+   */
+  export interface IBufferLineJSONObj {
+    isWrapped: boolean;
+    cells: ICellDataJSONObj[];
+  }
+
+  /**
+   * The serialized form of attribute data.
+   */
+  export interface ISerializedAttributeDataJSONObj {
+    fg: number;
+    bg: number;
+    extended: IExtendedAttrsJSONObj;
+  }
+
+  /**
+   * The serialized form of a terminal buffer.
+   */
+  export interface IBufferJSONObj {
+    hasScrollback: boolean;
+    cols: number;
+    rows: number;
+    ydisp: number;
+    ybase: number;
+    y: number;
+    x: number;
+    tabs: Record<string, true>;
+    scrollBottom: number;
+    scrollTop: number;
+    savedY: number;
+    savedX: number;
+    savedCharset: Record<string, string | undefined> | null;
+    savedCurAttrData: ISerializedAttributeDataJSONObj;
+    lines: IBufferLineJSONObj[];
+  }
+
+  /**
    * Represents a terminal buffer.
    */
   interface IBuffer {
@@ -1024,6 +1153,16 @@ declare module '@xterm/headless' {
      * cell objects when dealing with tons of cells.
      */
     getNullCell(): IBufferCell;
+
+    /**
+     * Restores the buffer state from serialized data.
+     */
+    fromJSON(data: IBufferJSONObj): IBuffer;
+
+    /**
+     * Serializes the buffer state into JSON-friendly data.
+     */
+    toJSON(): IBufferJSONObj;
   }
 
   /**

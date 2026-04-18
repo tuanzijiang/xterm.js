@@ -25,6 +25,7 @@ import { DEFAULT_ATTR_DATA } from 'common/buffer/BufferLine';
 import { IBuffer } from 'common/buffer/Types';
 import { CoreTerminal } from 'common/CoreTerminal';
 import { IMarker, ITerminalOptions } from 'common/Types';
+import { IToPNGOptions, renderTerminalToPNG } from 'headless/CanvasRenderer';
 import { Emitter, Event } from 'vs/base/common/event';
 
 export class Terminal extends CoreTerminal {
@@ -38,6 +39,8 @@ export class Terminal extends CoreTerminal {
   public readonly onA11yChar = this._onA11yCharEmitter.event;
   private readonly _onA11yTabEmitter = this._register(new Emitter<number>());
   public readonly onA11yTab = this._onA11yTabEmitter.event;
+  private readonly _onBufferChange = this._register(new Emitter<IBuffer>());
+  public readonly onBufferChange = this._onBufferChange.event;
 
   constructor(
     options: ITerminalOptions = {}
@@ -49,10 +52,13 @@ export class Terminal extends CoreTerminal {
     // Setup InputHandler listeners
     this._register(this._inputHandler.onRequestBell(() => this.bell()));
     this._register(this._inputHandler.onRequestReset(() => this.reset()));
+    this._register(this._inputHandler.onRequestRefreshRows(() => this._onBufferChange.fire(this.buffer)));
     this._register(Event.forward(this._inputHandler.onCursorMove, this._onCursorMove));
     this._register(Event.forward(this._inputHandler.onTitleChange, this._onTitleChange));
     this._register(Event.forward(this._inputHandler.onA11yChar, this._onA11yCharEmitter));
     this._register(Event.forward(this._inputHandler.onA11yTab, this._onA11yTabEmitter));
+    this._register(this.onResize(() => this._onBufferChange.fire(this.buffer)));
+    this._register(this.onScroll(() => this._onBufferChange.fire(this.buffer)));
   }
 
   /**
@@ -79,6 +85,10 @@ export class Terminal extends CoreTerminal {
 
   public bell(): void {
     this._onBell.fire();
+  }
+
+  public async toPNG(options?: IToPNGOptions): Promise<Uint8Array> {
+    return renderTerminalToPNG(this.buffer, this.optionsService, { cols: this.cols, rows: this.rows }, options);
   }
 
   public input(data: string, wasUserInput: boolean = true): void {
@@ -136,5 +146,6 @@ export class Terminal extends CoreTerminal {
 
     this._setup();
     super.reset();
+    this._onBufferChange.fire(this.buffer);
   }
 }

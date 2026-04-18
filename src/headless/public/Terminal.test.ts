@@ -241,6 +241,14 @@ describe('Headless API Tests', function (): void {
       await writeSync('\x07');
       deepStrictEqual(calls, [true]);
     });
+
+    it('onBufferChange', async () => {
+      const calls: string[] = [];
+      term.onBufferChange(e => calls.push(e.getLine(0)?.translateToString(true) ?? ''));
+      await writeSync('foo');
+      await writeSync('bar');
+      deepStrictEqual(calls, ['foo', 'foobar']);
+    });
   });
 
   describe('buffer', () => {
@@ -509,6 +517,40 @@ describe('Headless API Tests', function (): void {
     term.dispose();
     strictEqual((term as any)._core._store.isDisposed, true);
   });
+
+  describe('toPNG', () => {
+    it('renders the viewport using the injected canvas factory', async () => {
+      await writeSync('\x1b[31mR\x1b[0mX');
+      const factory = new MockCanvasFactory();
+      const png = await term.toPNG({ canvasFactory: factory, includeCursor: true, padding: 2 });
+      strictEqual(Buffer.from(png).toString('utf8'), 'mock-png');
+      strictEqual(factory.calls.length, 2);
+      strictEqual(factory.calls[1].width > 0, true);
+      strictEqual(factory.calls[1].height > 0, true);
+
+      const textOps = factory.lastOperations.filter(e => e.type === 'fillText');
+      deepStrictEqual(textOps.map(e => e.text), ['R', 'X']);
+      strictEqual(textOps.some(e => e.fillStyle === '#cc0000'), true);
+    });
+
+    it('accepts a logger in toPNG options', async () => {
+      const factory = new MockCanvasFactory();
+      const infoCalls: unknown[][] = [];
+      const errorCalls: unknown[][] = [];
+
+      await term.toPNG({
+        canvasFactory: factory,
+        logger: {
+          info: (...args: unknown[]) => infoCalls.push(args),
+          error: (...args: unknown[]) => errorCalls.push(args)
+        }
+      });
+
+      strictEqual(infoCalls[0]?.[0], 'Rendering terminal to PNG');
+      strictEqual(infoCalls.length > 0, true);
+      deepStrictEqual(errorCalls, []);
+    });
+  });
 });
 
 function writeSync(text: string | Uint8Array): Promise<void> {
@@ -517,6 +559,73 @@ function writeSync(text: string | Uint8Array): Promise<void> {
 
 function writelnSync(text: string | Uint8Array): Promise<void> {
   return new Promise<void>(r => term.writeln(text, r));
+}
+
+class MockCanvasFactory {
+  public calls: { width: number; height: number }[] = [];
+  public lastOperations: IMockCanvasOperation[] = [];
+
+  public createCanvas(width: number, height: number): MockCanvas {
+    this.calls.push({ width, height });
+    const operations = this.calls.length === 1 ? [] : this.lastOperations;
+    return new MockCanvas(operations);
+  }
+}
+
+type IMockCanvasOperation =
+  | { type: 'fillRect'; fillStyle: unknown; x: number; y: number; width: number; height: number }
+  | { type: 'fillText'; fillStyle: unknown; text: string; x: number; y: number; font: string }
+  | { type: 'stroke'; strokeStyle: unknown };
+
+class MockCanvas {
+  constructor(private readonly _operations: IMockCanvasOperation[]) { }
+
+  public getContext(contextId: '2d'): MockContext | null {
+    if (contextId !== '2d') {
+      return null;
+    }
+    return new MockContext(this._operations);
+  }
+
+  public toBuffer(): Uint8Array {
+    return Buffer.from('mock-png');
+  }
+}
+
+class MockContext {
+  public fillStyle: unknown;
+  public strokeStyle: unknown;
+  public font: string = '';
+  public textBaseline: string = 'top';
+  public lineWidth: number = 1;
+  public globalAlpha: number = 1;
+
+  constructor(private readonly _operations: IMockCanvasOperation[]) { }
+
+  public fillRect(x: number, y: number, width: number, height: number): void {
+    this._operations.push({ type: 'fillRect', fillStyle: this.fillStyle, x, y, width, height });
+  }
+
+  public fillText(text: string, x: number, y: number): void {
+    this._operations.push({ type: 'fillText', fillStyle: this.fillStyle, text, x, y, font: this.font });
+  }
+
+  public measureText(text: string): { width: number; fontBoundingBoxAscent: number; fontBoundingBoxDescent: number } {
+    return {
+      width: text.length * 8,
+      fontBoundingBoxAscent: 12,
+      fontBoundingBoxDescent: 4
+    };
+  }
+
+  public save(): void { }
+  public restore(): void { }
+  public beginPath(): void { }
+  public moveTo(_x: number, _y: number): void { }
+  public lineTo(_x: number, _y: number): void { }
+  public stroke(): void {
+    this._operations.push({ type: 'stroke', strokeStyle: this.strokeStyle });
+  }
 }
 
 function lineEquals(index: number, text: string): void {

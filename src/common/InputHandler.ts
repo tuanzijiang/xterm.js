@@ -178,7 +178,6 @@ export class InputHandler extends Disposable implements IInputHandler {
     private readonly _unicodeService: IUnicodeService,
     private readonly _parser: IEscapeSequenceParser = new EscapeSequenceParser()
   ) {
-    console.info('InputHandler constructor 1112');
     super();
     this._register(this._parser);
     this._dirtyRowTracker = new DirtyRowTracker(this._bufferService);

@@ -6,12 +6,12 @@
 import { BufferNamespaceApi } from 'common/public/BufferNamespaceApi';
 import { ParserApi } from 'common/public/ParserApi';
 import { UnicodeApi } from 'common/public/UnicodeApi';
-import { IBufferNamespace as IBufferNamespaceApi, IMarker, IModes, IParser, ITerminalAddon, ITerminalInitOnlyOptions, IUnicodeHandling, Terminal as ITerminalApi } from '@xterm/headless';
+import { IBuffer as IBufferApi, IBufferNamespace as IBufferNamespaceApi, IMarker, IModes, IParser, ITerminalAddon, ITerminalInitOnlyOptions, ITerminalToPNGOptions, IUnicodeHandling, Terminal as ITerminalApi } from '@xterm/headless';
 import { Terminal as TerminalCore } from 'headless/Terminal';
 import { AddonManager } from 'common/public/AddonManager';
 import { ITerminalOptions } from 'common/Types';
 import { Disposable } from 'vs/base/common/lifecycle';
-import type { Event } from 'vs/base/common/event';
+import { Emitter, type Event } from 'vs/base/common/event';
 /**
  * The set of options that only have an effect when set in the Terminal constructor.
  */
@@ -23,12 +23,14 @@ export class Terminal extends Disposable implements ITerminalApi {
   private _parser: IParser | undefined;
   private _buffer: BufferNamespaceApi | undefined;
   private _publicOptions: Required<ITerminalOptions>;
+  private readonly _onBufferChange = this._register(new Emitter<IBufferApi>());
 
   constructor(options?: ITerminalOptions & ITerminalInitOnlyOptions) {
     super();
 
     this._core = this._register(new TerminalCore(options));
     this._addonManager = this._register(new AddonManager());
+    this._register(this._core.onBufferChange(() => this._onBufferChange.fire(this._getBufferNamespace().active)));
 
     this._publicOptions = { ... this._core.options };
     const getter = (propName: string): any => {
@@ -81,6 +83,10 @@ export class Terminal extends Disposable implements ITerminalApi {
   public get onScroll(): Event<number> { return this._core.onScroll; }
   public get onTitleChange(): Event<string> { return this._core.onTitleChange; }
   public get onWriteParsed(): Event<void> { return this._core.onWriteParsed; }
+  public get onBufferChange(): Event<IBufferApi> {
+    this._checkProposedApi();
+    return this._onBufferChange.event;
+  }
 
   public get parser(): IParser {
     this._checkProposedApi();
@@ -97,10 +103,7 @@ export class Terminal extends Disposable implements ITerminalApi {
   public get cols(): number { return this._core.cols; }
   public get buffer(): IBufferNamespaceApi {
     this._checkProposedApi();
-    if (!this._buffer) {
-      this._buffer = this._register(new BufferNamespaceApi(this._core));
-    }
-    return this._buffer;
+    return this._getBufferNamespace();
   }
   public get markers(): ReadonlyArray<IMarker> {
     this._checkProposedApi();
@@ -175,6 +178,9 @@ export class Terminal extends Disposable implements ITerminalApi {
   public clear(): void {
     this._core.clear();
   }
+  public async toPNG(options?: ITerminalToPNGOptions): Promise<Uint8Array> {
+    return this._core.toPNG(options);
+  }
   public write(data: string | Uint8Array, callback?: () => void): void {
     this._core.write(data, callback);
   }
@@ -187,7 +193,7 @@ export class Terminal extends Disposable implements ITerminalApi {
   }
   public loadAddon(addon: ITerminalAddon): void {
     // TODO: This could cause issues if the addon calls renderer apis
-    this._addonManager.loadAddon(this as any, addon);
+    this._addonManager.loadAddon(this as any, addon as any);
   }
 
   private _verifyIntegers(...values: number[]): void {
@@ -196,5 +202,12 @@ export class Terminal extends Disposable implements ITerminalApi {
         throw new Error('This API only accepts integers');
       }
     }
+  }
+
+  private _getBufferNamespace(): BufferNamespaceApi {
+    if (!this._buffer) {
+      this._buffer = this._register(new BufferNamespaceApi(this._core));
+    }
+    return this._buffer;
   }
 }

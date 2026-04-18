@@ -1498,6 +1498,63 @@ declare module '@xterm/xterm' {
   }
 
   /**
+   * The serialized form of extended cell attributes.
+   */
+  export interface IExtendedAttrsJSONObj {
+    ext: number;
+    urlId: number;
+  }
+
+  /**
+   * The serialized form of a buffer cell.
+   */
+  export interface ICellDataJSONObj {
+    content: number;
+    fg: number;
+    bg: number;
+    extended: IExtendedAttrsJSONObj;
+    combinedData: string;
+  }
+
+  /**
+   * The serialized form of a buffer line.
+   */
+  export interface IBufferLineJSONObj {
+    isWrapped: boolean;
+    cells: ICellDataJSONObj[];
+  }
+
+  /**
+   * The serialized form of attribute data.
+   */
+  export interface ISerializedAttributeDataJSONObj {
+    fg: number;
+    bg: number;
+    extended: IExtendedAttrsJSONObj;
+  }
+
+  /**
+   * The serialized form of a terminal buffer.
+   */
+  export interface IBufferJSONObj {
+    hasScrollback: boolean;
+    cols: number;
+    rows: number;
+    ydisp: number;
+    ybase: number;
+    y: number;
+    x: number;
+    tabs: Record<string, true>;
+    scrollBottom: number;
+    scrollTop: number;
+    savedY: number;
+    savedX: number;
+    savedCharset: Record<string, string | undefined> | null;
+    savedCurAttrData: ISerializedAttributeDataJSONObj;
+    lines: IBufferLineJSONObj[];
+  }
+
+  /**
    * Represents a terminal buffer.
    */
   interface IBuffer {
@@ -1573,6 +1630,16 @@ declare module '@xterm/xterm' {
      * cell objects when dealing with tons of cells.
      */
     getNullCell(): IBufferCell;
+
+    /**
+     * Restores the buffer state from serialized data.
+     */
+    fromJSON(data: IBufferJSONObj): IBuffer;
+
+    /**
+     * Serializes the buffer state into JSON-friendly data.
+     */
+    toJSON(): IBufferJSONObj;
   }
 
   export interface IBufferElementProvider {
