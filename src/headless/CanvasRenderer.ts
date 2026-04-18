@@ -6,7 +6,7 @@
 import { CellData } from 'common/buffer/CellData';
 import { Attributes } from 'common/buffer/Constants';
 import { IBuffer } from 'common/buffer/Types';
-import { channels, css } from 'common/Color';
+import { channels, color, css } from 'common/Color';
 import { ITheme, ITerminalOptions } from 'common/services/Services';
 import { ICellData } from 'common/Types';
 
@@ -177,6 +177,7 @@ export async function renderTerminalToPNG(
         foreground = background;
         background = swapped;
       }
+      foreground = applyMinimumContrast(background, foreground, !!currentCell.isDim(), currentCell.getCode(), optionsService.rawOptions.minimumContrastRatio);
 
       const cellLeft = padding + x * cellWidth;
       const cellPixelWidth = Math.max(cellWidth, width * cellWidth);
@@ -307,6 +308,30 @@ function resolveColor(mode: number, value: number, fallback: string, palette: st
     default:
       return fallback;
   }
+}
+
+function applyMinimumContrast(backgroundCss: string, foregroundCss: string, isDim: boolean, codepoint: number, minimumContrastRatio: number): string {
+  if (minimumContrastRatio === 1 || treatGlyphAsBackgroundColor(codepoint)) {
+    return foregroundCss;
+  }
+  const adjusted = color.ensureContrastRatio(
+    css.toColor(backgroundCss),
+    css.toColor(foregroundCss),
+    minimumContrastRatio / (isDim ? 2 : 1)
+  );
+  return adjusted?.css ?? foregroundCss;
+}
+
+function treatGlyphAsBackgroundColor(codepoint: number): boolean {
+  return isPowerlineGlyph(codepoint) || isBoxOrBlockGlyph(codepoint);
+}
+
+function isPowerlineGlyph(codepoint: number): boolean {
+  return 0xE0A4 <= codepoint && codepoint <= 0xE0D6;
+}
+
+function isBoxOrBlockGlyph(codepoint: number): boolean {
+  return 0x2500 <= codepoint && codepoint <= 0x259F;
 }
 
 function resolveTheme(theme: ITheme = {}): IResolvedTheme {

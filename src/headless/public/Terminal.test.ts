@@ -3,7 +3,7 @@
  * @license MIT
  */
 
-import { deepStrictEqual, strictEqual, throws } from 'assert';
+import { deepStrictEqual, notStrictEqual, strictEqual, throws } from 'assert';
 import { Terminal } from 'headless/public/Terminal';
 import { ITerminalOptions } from '@xterm/headless';
 
@@ -549,6 +549,24 @@ describe('Headless API Tests', function (): void {
       strictEqual(infoCalls[0]?.[0], 'Rendering terminal to PNG');
       strictEqual(infoCalls.length > 0, true);
       deepStrictEqual(errorCalls, []);
+    });
+
+    it('applies minimum contrast ratio to default foreground text on a bright background', async () => {
+      term = new Terminal({
+        allowProposedApi: true,
+        minimumContrastRatio: 4.5,
+        theme: {
+          foreground: '#e6edf3'
+        }
+      });
+      await writeSync('\x1b[48;2;244;244;244m章');
+
+      const factory = new MockCanvasFactory();
+      await term.toPNG({ canvasFactory: factory });
+
+      const textOps = factory.lastOperations.filter((e): e is Extract<IMockCanvasOperation, { type: 'fillText' }> => e.type === 'fillText');
+      strictEqual(textOps.length, 1);
+      notStrictEqual(textOps[0].fillStyle, '#e6edf3');
     });
   });
 });
