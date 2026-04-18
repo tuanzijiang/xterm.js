@@ -213,8 +213,9 @@ export interface IAttributeData {
   getUnderlineVariantOffset(): number;
 }
 
+
 /** Cell data */
-export interface ICellData extends IAttributeData, IBufferSerializable<ICellData> {
+export interface ICellData extends IAttributeData, ISerializable {
   content: number;
   combinedData: string;
   isCombined(): number;
@@ -223,6 +224,7 @@ export interface ICellData extends IAttributeData, IBufferSerializable<ICellData
   getCode(): number;
   setFromCharData(value: CharData): void;
   getAsCharData(): CharData;
+  toDisplayJSON(): JSONObject;
 }
 
 /**
@@ -230,16 +232,15 @@ export interface ICellData extends IAttributeData, IBufferSerializable<ICellData
  * Serialized JSON must represent a semantically meaningful object with named fields,
  * not a positional array whose meaning depends on field order.
  */
-export interface IBufferSerializable<T> {
-  fromJSON(json: JSONObject): T;
+export interface ISerializable {
+  fromJSON(json: JSONObject): this;
   toJSON(): JSONObject;
-  toDisplayJSON(): JSONObject;
 }
 
 /**
  * Interface for a line in the terminal buffer.
  */
-export interface IBufferLine extends IBufferSerializable<IBufferLine> {
+export interface IBufferLine extends ISerializable {
   length: number;
   isWrapped: boolean;
   get(index: number): CharData;

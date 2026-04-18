@@ -104,7 +104,7 @@ export class CellData extends AttributeData implements ICellData {
     return [this.fg, this.getChars(), this.getWidth(), this.getCode()];
   }
 
-  public fromJSON(json: JSONObject): CellData {
+  public fromJSON(json: JSONObject): this {
     const data = json as ICellDataJSON;
     this.content = data.content;
     this.fg = data.fg;

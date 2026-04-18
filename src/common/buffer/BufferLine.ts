@@ -470,7 +470,7 @@ export class BufferLine implements IBufferLine {
     return newLine;
   }
 
-  public fromJSON(json: JSONObject): IBufferLine {
+  public fromJSON(json: JSONObject): this {
     const data = json as IBufferLineJSON;
     this._data = new Uint32Array(data.cells.length * CELL_SIZE);
     this.length = data.cells.length;

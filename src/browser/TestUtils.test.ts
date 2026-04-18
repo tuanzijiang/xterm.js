@@ -234,7 +234,7 @@ export class MockBuffer implements IBuffer {
   public savedX!: number;
   public savedCharset: ICharset | undefined;
   public savedCurAttrData = new AttributeData();
-  public fromJSON(json: JSONObject): IBuffer {
+  public fromJSON(json: JSONObject): this {
     throw new Error('Method not implemented.');
   }
   public toJSON(): JSONObject {

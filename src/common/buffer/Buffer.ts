@@ -174,7 +174,7 @@ export class Buffer implements IBuffer {
     return (relativeY >= 0 && relativeY < this._rows);
   }
 
-  public fromJSON(json: JSONObject): IBuffer {
+  public fromJSON(json: JSONObject): this {
     const data = json as unknown as IBufferJSON;
     this._hasScrollback = data.hasScrollback;
     this._cols = data.cols;

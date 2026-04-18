@@ -62,7 +62,7 @@ export class JoinedCellData extends AttributeData implements ICellData {
     return [this.fg, this.getChars(), this.getWidth(), this.getCode()];
   }
 
-  public fromJSON(json: JSONObject): ICellData {
+  public fromJSON(json: JSONObject): this {
     const data = json as IJoinedCellDataJSON;
     this.fg = data.fg;
     this.bg = data.bg;
