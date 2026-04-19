@@ -338,6 +338,9 @@ describe('Headless API Tests', function (): void {
           { isWrapped: false, cells: [{ chars: 'bar  ', width: 5 }] },
           { isWrapped: false, cells: [{ chars: '     ', width: 5 }] }
         ],
+        rows: 3,
+        viewportTopLine: 0,
+        viewportY: 0,
         viewportBottomLine: 2,
         effectiveLength: 2
       });

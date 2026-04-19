@@ -226,10 +226,15 @@ export class Buffer implements IBuffer {
     for (let i = 0; i < this.lines.length; i++) {
       lines.push(this.lines.get(i)!.toDisplayJSON());
     }
+    const viewportBottomLine = this.getViewportBottomLine() ?? null;
+    const viewportTopLine = viewportBottomLine === null ? null : Math.max(0, viewportBottomLine - this._rows + 1);
 
     return {
       lines,
-      viewportBottomLine: this.getViewportBottomLine() ?? null,
+      rows: this._rows,
+      viewportTopLine,
+      viewportY: viewportTopLine,
+      viewportBottomLine,
       effectiveLength: this.getEffectiveLength()
     };
   }

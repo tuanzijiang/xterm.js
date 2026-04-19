@@ -100,6 +100,9 @@ describe('Buffer', () => {
 
       const display = buffer.toDisplayJSON() as {
         lines: Array<{ isWrapped: boolean; cells: Array<{ chars: string; width: number }> }>;
+        rows: number;
+        viewportTopLine: number | null;
+        viewportY: number | null;
         viewportBottomLine: number | null;
         effectiveLength: number;
       };
@@ -119,6 +122,9 @@ describe('Buffer', () => {
           width: INIT_COLS
         }]
       });
+      assert.strictEqual(display.rows, INIT_ROWS);
+      assert.strictEqual(display.viewportTopLine, 0);
+      assert.strictEqual(display.viewportY, 0);
       assert.strictEqual(display.viewportBottomLine, INIT_ROWS - 1);
       assert.equal(display.effectiveLength, 2);
     });

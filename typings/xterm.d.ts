@@ -1574,8 +1574,32 @@ declare module '@xterm/xterm' {
    * The display form of a terminal buffer.
    */
   export interface IBufferDisplayJSONObj {
+    /**
+     * All buffer lines in display-friendly form. The array index matches the absolute line index
+     * within the active buffer.
+     */
     lines: IBufferLineDisplayJSONObj[];
+    /**
+     * The viewport height in rows.
+     */
+    rows: number;
+    /**
+     * The absolute buffer line index of the first visible row, or null when the buffer has no
+     * visible bottom line yet.
+     */
+    viewportTopLine: number | null;
+    /**
+     * Alias of viewportTopLine using the same semantics as Buffer.ydisp.
+     */
+    viewportY: number | null;
+    /**
+     * The absolute buffer line index of the last visible row, or null when the buffer has no
+     * visible bottom line yet.
+     */
     viewportBottomLine: number | null;
+    /**
+     * The number of meaningful lines in the buffer, excluding trailing blank lines.
+     */
     effectiveLength: number;
   }
 
