@@ -138,6 +138,13 @@ export interface ICellDataJSONObj extends JSONObject {
   combinedData: string;
 }
 
+export interface ICellDataDisplayJSONObj extends JSONObject {
+  chars: string;
+  width: number;
+  code: number;
+  isCombined: boolean;
+}
+
 export interface IJoinedCellDataJSONObj extends JSONObject {
   fg: number;
   bg: number;
@@ -266,7 +273,7 @@ export interface IAttributeData {
 
 
 /** Cell data */
-export interface ICellData extends IAttributeData, ISerializable<ICellDataJSON> {
+export interface ICellData extends IAttributeData, ISerializable<ICellDataJSON>, IDisplaySerializable<ICellDataDisplayJSONObj> {
   content: number;
   combinedData: string;
   isCombined(): number;
@@ -275,7 +282,6 @@ export interface ICellData extends IAttributeData, ISerializable<ICellDataJSON> 
   getCode(): number;
   setFromCharData(value: CharData): void;
   getAsCharData(): CharData;
-  toDisplayJSON(): JSONObject;
 }
 
 /**
@@ -286,6 +292,14 @@ export interface ICellData extends IAttributeData, ISerializable<ICellDataJSON> 
 export interface ISerializable<T extends JSONObject> {
   fromJSON(json: T): this;
   toJSON(): T;
+}
+
+/**
+ * Human-readable serialization contract.
+ * Display JSON is intended for inspection/export rather than full fidelity restoration.
+ */
+export interface IDisplaySerializable<T extends JSONObject> {
+  toDisplayJSON(): T;
 }
 
 /**

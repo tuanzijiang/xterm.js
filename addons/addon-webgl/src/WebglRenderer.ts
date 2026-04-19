@@ -10,7 +10,7 @@ import { CursorBlinkStateManager } from './CursorBlinkStateManager';
 import { observeDevicePixelDimensions } from './DevicePixelObserver';
 import { IRenderDimensions, IRenderer, IRequestRedrawEvent } from 'browser/renderer/shared/Types';
 import { ICharSizeService, ICharacterJoinerService, ICoreBrowserService, IThemeService } from 'browser/services/Services';
-import { CharData, IBufferLine, ICellData, IJoinedCellDataJSONObj, JSONObject } from 'common/Types';
+import { CharData, IBufferLine, ICellData, ICellDataDisplayJSONObj, IJoinedCellDataJSONObj } from 'common/Types';
 import { AttributeData } from 'common/buffer/AttributeData';
 import { CellData } from 'common/buffer/CellData';
 import { Attributes, Content, NULL_CELL_CHAR, NULL_CELL_CODE } from 'common/buffer/Constants';
@@ -691,8 +691,13 @@ export class JoinedCellData extends AttributeData implements ICellData {
     };
   }
 
-  public toDisplayJSON(): JSONObject {
-    return this.toJSON();
+  public toDisplayJSON(): ICellDataDisplayJSONObj {
+    return {
+      chars: this.getChars(),
+      width: this.getWidth(),
+      code: this.getCode(),
+      isCombined: !!this.isCombined()
+    };
   }
 }
 

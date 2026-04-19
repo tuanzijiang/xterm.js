@@ -3,7 +3,7 @@
  * @license MIT
  */
 
-import { CharData, ICellData, ICellDataJSONObj, IExtendedAttrs, JSONObject } from 'common/Types';
+import { CharData, ICellData, ICellDataDisplayJSONObj, ICellDataJSONObj, IExtendedAttrs } from 'common/Types';
 import { stringFromCodePoint } from 'common/input/TextDecoder';
 import { CHAR_DATA_CHAR_INDEX, CHAR_DATA_WIDTH_INDEX, CHAR_DATA_ATTR_INDEX, Content } from 'common/buffer/Constants';
 import { AttributeData, ExtendedAttrs } from 'common/buffer/AttributeData';
@@ -115,7 +115,7 @@ export class CellData extends AttributeData implements ICellData {
     };
   }
 
-  public toDisplayJSON(): JSONObject {
+  public toDisplayJSON(): ICellDataDisplayJSONObj {
     return {
       chars: this.getChars(),
       width: this.getWidth(),

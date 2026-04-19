@@ -3,7 +3,7 @@
  * @license MIT
  */
 
-import { IBufferLine, ICellData, IJoinedCellDataJSONObj, CharData, JSONObject } from 'common/Types';
+import { IBufferLine, ICellData, ICellDataDisplayJSONObj, IJoinedCellDataJSONObj, CharData } from 'common/Types';
 import { ICharacterJoiner } from 'browser/Types';
 import { AttributeData } from 'common/buffer/AttributeData';
 import { WHITESPACE_CELL_CHAR, Content } from 'common/buffer/Constants';
@@ -73,8 +73,13 @@ export class JoinedCellData extends AttributeData implements ICellData {
     };
   }
 
-  public toDisplayJSON(): JSONObject {
-    return this.toJSON();
+  public toDisplayJSON(): ICellDataDisplayJSONObj {
+    return {
+      chars: this.getChars(),
+      width: this.getWidth(),
+      code: this.getCode(),
+      isCombined: !!this.isCombined()
+    };
   }
 }
 

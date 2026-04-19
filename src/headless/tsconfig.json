@@ -12,14 +12,14 @@
     ],
     "baseUrl": "../",
     "paths": {
+      "@xterm/headless": [ "../../typings/xterm-headless.d.ts" ],
       "common/*": [ "./common/*" ],
       "vs/*": [ "./vs/*" ]
     }
   },
   "include": [
     "./**/*",
-    "../../typings/xterm.d.ts", // common/Types.d.ts imports from '@xterm/xterm'
-    "../../typings/xterm-headless.d.ts"
+    "../../typings/xterm.d.ts" // common/Types.d.ts imports from '@xterm/xterm'
   ],
   "references": [
     { "path": "../common" },
