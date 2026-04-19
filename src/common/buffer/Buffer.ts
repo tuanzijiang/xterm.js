@@ -5,7 +5,7 @@
 
 import { CircularList, IInsertEvent } from 'common/CircularList';
 import { IdleTaskQueue } from 'common/TaskQueue';
-import { IAttributeData, IBufferJSONObj, IBufferLine, ICellData, ICharset, JSONObject } from 'common/Types';
+import { IAttributeData, IBufferDisplayJSONObj, IBufferJSONObj, IBufferLine, ICellData, ICharset, JSONObject } from 'common/Types';
 import { ExtendedAttrs } from 'common/buffer/AttributeData';
 import { BufferLine, DEFAULT_ATTR_DATA } from 'common/buffer/BufferLine';
 import { getWrappedLineTrimmedLength, reflowLargerApplyNewLayout, reflowLargerCreateNewLayout, reflowLargerGetLinesToRemove, reflowSmallerGetNewLineLengths } from 'common/buffer/BufferReflow';
@@ -220,8 +220,17 @@ export class Buffer implements IBuffer {
     return serialized;
   }
 
-  public toDisplayJSON(): JSONObject {
-    return this.toJSON();
+  public toDisplayJSON(): IBufferDisplayJSONObj {
+    const lines: IBufferDisplayJSONObj['lines'] = [];
+    for (let i = 0; i < this.lines.length; i++) {
+      lines.push(this.lines.get(i)!.toDisplayJSON());
+    }
+
+    return {
+      lines,
+      viewportBottomLine: this.getViewportBottomLine()?.toDisplayJSON() ?? null,
+      effectiveLength: this.getEffectiveLength()
+    };
   }
 
   /**

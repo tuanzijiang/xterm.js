@@ -328,6 +328,21 @@ describe('Headless API Tests', function (): void {
       strictEqual(term.buffer.active.getEffectiveLength(), 3);
     });
 
+    it('toDisplayJSON', async () => {
+      term = new Terminal({ rows: 3, cols: 5, allowProposedApi: true });
+      await writelnSync('foo');
+      await writeSync('bar');
+      deepStrictEqual(term.buffer.active.toDisplayJSON(), {
+        lines: [
+          { isWrapped: false, cells: [{ chars: 'foo  ', width: 5 }] },
+          { isWrapped: false, cells: [{ chars: 'bar  ', width: 5 }] },
+          { isWrapped: false, cells: [{ chars: '     ', width: 5 }] }
+        ],
+        viewportBottomLine: { isWrapped: false, cells: [{ chars: '     ', width: 5 }] },
+        effectiveLength: 2
+      });
+    });
+
     describe('getLine', () => {
       it('invalid index', async () => {
         term = new Terminal({ rows: 5, allowProposedApi: true });

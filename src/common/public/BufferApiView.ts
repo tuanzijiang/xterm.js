@@ -3,7 +3,7 @@
  * @license MIT
  */
 
-import { IBuffer as IBufferApi, IBufferCell as IBufferCellApi, IBufferJSONObj, IBufferLine as IBufferLineApi } from '@xterm/xterm';
+import { IBuffer as IBufferApi, IBufferCell as IBufferCellApi, IBufferDisplayJSONObj, IBufferJSONObj, IBufferLine as IBufferLineApi } from '@xterm/xterm';
 import { IBuffer } from 'common/buffer/Types';
 import { IBufferJSONObj as ICoreBufferJSONObj } from 'common/Types';
 import { BufferLineApiView } from 'common/public/BufferLineApiView';
@@ -27,6 +27,9 @@ export class BufferApiView implements IBufferApi {
   public get length(): number { return this._buffer.lines.length; }
   public getLength(): number { return this._buffer.getLength(); }
   public getEffectiveLength(): number { return this._buffer.getEffectiveLength(); }
+  public toDisplayJSON(): IBufferDisplayJSONObj {
+    return this._buffer.toDisplayJSON() as unknown as IBufferDisplayJSONObj;
+  }
   public getLine(y: number): IBufferLineApi | undefined {
     const line = this._buffer.lines.get(y);
     if (!line) {

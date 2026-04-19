@@ -145,6 +145,16 @@ export interface ICellDataDisplayJSONObj extends JSONObject {
   isCombined: boolean;
 }
 
+export interface IBufferLineDisplayCellJSONObj extends JSONObject {
+  chars: string;
+  width: number;
+}
+
+export interface IBufferLineDisplayJSONObj extends JSONObject {
+  isWrapped: boolean;
+  cells: IBufferLineDisplayCellJSONObj[];
+}
+
 export interface IJoinedCellDataJSONObj extends JSONObject {
   fg: number;
   bg: number;
@@ -181,6 +191,12 @@ export interface IBufferJSONObj extends JSONObject {
   savedCharset: JSONObject | null;
   savedCurAttrData: ISerializedAttributeDataJSONObj;
   lines: IBufferLineJSONObj[];
+}
+
+export interface IBufferDisplayJSONObj extends JSONObject {
+  lines: IBufferLineDisplayJSONObj[];
+  viewportBottomLine: IBufferLineDisplayJSONObj | null;
+  effectiveLength: number;
 }
 
 /**
@@ -305,7 +321,7 @@ export interface IDisplaySerializable<T extends JSONObject> {
 /**
  * Interface for a line in the terminal buffer.
  */
-export interface IBufferLine extends ISerializable<IBufferLineJSONObj> {
+export interface IBufferLine extends ISerializable<IBufferLineJSONObj>, IDisplaySerializable<IBufferLineDisplayJSONObj> {
   length: number;
   isWrapped: boolean;
   get(index: number): CharData;

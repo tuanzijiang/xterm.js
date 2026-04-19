@@ -1040,6 +1040,22 @@ declare module '@xterm/headless' {
   }
 
   /**
+   * The display form of a buffer line cell.
+   */
+  export interface IBufferLineDisplayCellJSONObj {
+    chars: string;
+    width: number;
+  }
+
+  /**
+   * The display form of a buffer line.
+   */
+  export interface IBufferLineDisplayJSONObj {
+    isWrapped: boolean;
+    cells: IBufferLineDisplayCellJSONObj[];
+  }
+
+  /**
    * The serialized form of a buffer line.
    */
   export interface IBufferLineJSONObj {
@@ -1075,6 +1091,15 @@ declare module '@xterm/headless' {
     savedCharset: Record<string, string | undefined> | null;
     savedCurAttrData: ISerializedAttributeDataJSONObj;
     lines: IBufferLineJSONObj[];
+  }
+
+  /**
+   * The display form of a terminal buffer.
+   */
+  export interface IBufferDisplayJSONObj {
+    lines: IBufferLineDisplayJSONObj[];
+    viewportBottomLine: IBufferLineDisplayJSONObj | null;
+    effectiveLength: number;
   }
 
   /**
@@ -1136,6 +1161,11 @@ declare module '@xterm/headless' {
      * Gets the effective amount of lines, excluding trailing blank lines.
      */
     getEffectiveLength(): number;
+
+    /**
+     * Gets the display form of the buffer.
+     */
+    toDisplayJSON(): IBufferDisplayJSONObj;
 
     /**
      * Gets the line where the cursor is currently located.

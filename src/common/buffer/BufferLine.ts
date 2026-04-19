@@ -3,7 +3,7 @@
  * @license MIT
  */
 
-import { CharData, IAttributeData, IBufferLine, IBufferLineJSONObj, ICellData, ICellDataJSONObj, IExtendedAttrs, JSONObject } from 'common/Types';
+import { CharData, IAttributeData, IBufferLine, IBufferLineDisplayJSONObj, IBufferLineJSONObj, ICellData, ICellDataJSONObj, IExtendedAttrs } from 'common/Types';
 import { AttributeData } from 'common/buffer/AttributeData';
 import { CellData } from 'common/buffer/CellData';
 import { Attributes, BgFlags, CHAR_DATA_ATTR_INDEX, CHAR_DATA_CHAR_INDEX, CHAR_DATA_WIDTH_INDEX, Content, NULL_CELL_CHAR, NULL_CELL_CODE, NULL_CELL_WIDTH, WHITESPACE_CELL_CHAR } from 'common/buffer/Constants';
@@ -36,13 +36,6 @@ const enum Cell {
 }
 
 export const DEFAULT_ATTR_DATA = Object.freeze(new AttributeData());
-
-interface ICellDisplayJSON extends JSONObject {
-  chars: string;
-  width: number;
-  code: number;
-  isCombined: boolean;
-}
 
 // Work variables to avoid garbage collection
 let $startIndex = 0;
@@ -491,8 +484,7 @@ export class BufferLine implements IBufferLine {
     };
   }
 
-  public toDisplayJSON(): JSONObject {
-    const data = this.toJSON() as IBufferLineJSONObj;
+  public toDisplayJSON(): IBufferLineDisplayJSONObj {
     let chars = '';
     let width = 0;
     const cell = new CellData();
@@ -509,7 +501,7 @@ export class BufferLine implements IBufferLine {
     }
 
     return {
-      isWrapped: data.isWrapped,
+      isWrapped: this.isWrapped,
       cells: [{
         chars,
         width

@@ -86,10 +86,47 @@ describe('Buffer', () => {
       assert.deepEqual(restored.savedCharset, { G0: 'A' });
       assert.equal(restored.savedCurAttrData.fg, 123);
       assert.equal(restored.savedCurAttrData.bg, 456);
-      assert.equal(restored.savedCurAttrData.extended.ext, 789);
+      assert.equal(restored.savedCurAttrData.extended.ext, buffer.savedCurAttrData.extended.ext);
       assert.equal(restored.savedCurAttrData.extended.urlId, 42);
       assert.deepEqual(restored.tabs, { 0: true, 8: true, 16: true });
       assert.equal(restored.markers.length, 0);
+    });
+
+    it('should serialize display state with display lines only', () => {
+      buffer.fillViewportRows();
+      buffer.lines.get(0)!.setCell(0, CellData.fromCharData([1, 'A', 1, 'A'.charCodeAt(0)]));
+      buffer.lines.get(1)!.setCell(0, CellData.fromCharData([2, 'B', 1, 'B'.charCodeAt(0)]));
+      buffer.lines.get(1)!.isWrapped = true;
+
+      const display = buffer.toDisplayJSON() as {
+        lines: Array<{ isWrapped: boolean; cells: Array<{ chars: string; width: number }> }>;
+        viewportBottomLine: { isWrapped: boolean; cells: Array<{ chars: string; width: number }> };
+        effectiveLength: number;
+      };
+
+      assert.lengthOf(display.lines, INIT_ROWS);
+      assert.deepEqual(display.lines[0], {
+        isWrapped: false,
+        cells: [{
+          chars: `A${' '.repeat(INIT_COLS - 1)}`,
+          width: INIT_COLS
+        }]
+      });
+      assert.deepEqual(display.lines[1], {
+        isWrapped: true,
+        cells: [{
+          chars: `B${' '.repeat(INIT_COLS - 1)}`,
+          width: INIT_COLS
+        }]
+      });
+      assert.deepEqual(display.viewportBottomLine, {
+        isWrapped: false,
+        cells: [{
+          chars: ' '.repeat(INIT_COLS),
+          width: INIT_COLS
+        }]
+      });
+      assert.equal(display.effectiveLength, 2);
     });
   });
 
