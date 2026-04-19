@@ -133,8 +133,9 @@ export class Buffer implements IBuffer {
     return this.lines.get(this.ybase + this.y);
   }
 
-  public getViewportBottomLine(): IBufferLine | undefined {
-    return this.lines.get(this.ydisp + this._rows - 1);
+  public getViewportBottomLine(): number | undefined {
+    const lineIndex = this.ydisp + this._rows - 1;
+    return this.lines.get(lineIndex) ? lineIndex : undefined;
   }
 
   public get hasScrollback(): boolean {
@@ -228,7 +229,7 @@ export class Buffer implements IBuffer {
 
     return {
       lines,
-      viewportBottomLine: this.getViewportBottomLine()?.toDisplayJSON() ?? null,
+      viewportBottomLine: this.getViewportBottomLine() ?? null,
       effectiveLength: this.getEffectiveLength()
     };
   }

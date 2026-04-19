@@ -44,12 +44,8 @@ export class BufferApiView implements IBufferApi {
     }
     return new BufferLineApiView(line);
   }
-  public getViewportBottomLine(): IBufferLineApi | undefined {
-    const line = this._buffer.getViewportBottomLine();
-    if (!line) {
-      return undefined;
-    }
-    return new BufferLineApiView(line);
+  public getViewportBottomLine(): number | undefined {
+    return this._buffer.getViewportBottomLine();
   }
   public getNullCell(): IBufferCellApi { return new CellData(); }
   public fromJSON(data: IBufferJSONObj): IBufferApi {

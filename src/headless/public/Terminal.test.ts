@@ -338,7 +338,7 @@ describe('Headless API Tests', function (): void {
           { isWrapped: false, cells: [{ chars: 'bar  ', width: 5 }] },
           { isWrapped: false, cells: [{ chars: '     ', width: 5 }] }
         ],
-        viewportBottomLine: { isWrapped: false, cells: [{ chars: '     ', width: 5 }] },
+        viewportBottomLine: 2,
         effectiveLength: 2
       });
     });
@@ -396,7 +396,7 @@ describe('Headless API Tests', function (): void {
     it('getCursorLine, getViewportBottomLine', async () => {
       term = new Terminal({ rows: 3, cols: 5, allowProposedApi: true });
       strictEqual(term.buffer.active.getCursorLine()!.translateToString(true), '');
-      strictEqual(term.buffer.active.getViewportBottomLine()!.translateToString(true), '');
+      strictEqual(term.buffer.active.getViewportBottomLine(), 2);
       await writelnSync('foo');
       await writelnSync('bar');
       await writelnSync('baz');
@@ -405,11 +405,11 @@ describe('Headless API Tests', function (): void {
       strictEqual(term.buffer.active.baseY, 1);
       strictEqual(term.buffer.active.viewportY, 1);
       strictEqual(term.buffer.active.getCursorLine()!.translateToString(true), 'qux');
-      strictEqual(term.buffer.active.getViewportBottomLine()!.translateToString(true), 'qux');
+      strictEqual(term.buffer.active.getViewportBottomLine(), 3);
       term.scrollToTop();
       strictEqual(term.buffer.active.viewportY, 0);
       strictEqual(term.buffer.active.getCursorLine()!.translateToString(true), 'qux');
-      strictEqual(term.buffer.active.getViewportBottomLine()!.translateToString(true), 'baz');
+      strictEqual(term.buffer.active.getViewportBottomLine(), 2);
     });
 
     it('active, normal, alternate', async () => {

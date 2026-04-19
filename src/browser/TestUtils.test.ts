@@ -270,7 +270,7 @@ export class MockBuffer implements IBuffer {
   public getCursorLine(): IBufferLine | undefined {
     return Buffer.prototype.getCursorLine.apply(this, arguments as any);
   }
-  public getViewportBottomLine(): IBufferLine | undefined {
+  public getViewportBottomLine(): number | undefined {
     return Buffer.prototype.getViewportBottomLine.apply(this, arguments as any);
   }
   public getNullCell(attr?: IAttributeData): ICellData {

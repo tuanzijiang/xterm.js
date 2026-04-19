@@ -1098,7 +1098,7 @@ declare module '@xterm/headless' {
    */
   export interface IBufferDisplayJSONObj {
     lines: IBufferLineDisplayJSONObj[];
-    viewportBottomLine: IBufferLineDisplayJSONObj | null;
+    viewportBottomLine: number | null;
     effectiveLength: number;
   }
 
@@ -1175,7 +1175,7 @@ declare module '@xterm/headless' {
     /**
      * Gets the bottom-most line in the current viewport.
      */
-    getViewportBottomLine(): IBufferLine | undefined;
+    getViewportBottomLine(): number | undefined;
 
     /**
      * Creates an empty cell object suitable as a cell reference in

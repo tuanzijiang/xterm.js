@@ -100,7 +100,7 @@ describe('Buffer', () => {
 
       const display = buffer.toDisplayJSON() as {
         lines: Array<{ isWrapped: boolean; cells: Array<{ chars: string; width: number }> }>;
-        viewportBottomLine: { isWrapped: boolean; cells: Array<{ chars: string; width: number }> };
+        viewportBottomLine: number | null;
         effectiveLength: number;
       };
 
@@ -119,13 +119,7 @@ describe('Buffer', () => {
           width: INIT_COLS
         }]
       });
-      assert.deepEqual(display.viewportBottomLine, {
-        isWrapped: false,
-        cells: [{
-          chars: ' '.repeat(INIT_COLS),
-          width: INIT_COLS
-        }]
-      });
+      assert.strictEqual(display.viewportBottomLine, INIT_ROWS - 1);
       assert.equal(display.effectiveLength, 2);
     });
   });

@@ -1575,7 +1575,7 @@ declare module '@xterm/xterm' {
    */
   export interface IBufferDisplayJSONObj {
     lines: IBufferLineDisplayJSONObj[];
-    viewportBottomLine: IBufferLineDisplayJSONObj | null;
+    viewportBottomLine: number | null;
     effectiveLength: number;
   }
 
@@ -1652,7 +1652,7 @@ declare module '@xterm/xterm' {
     /**
      * Gets the bottom-most line in the current viewport.
      */
-    getViewportBottomLine(): IBufferLine | undefined;
+    getViewportBottomLine(): number | undefined;
 
     /**
      * Creates an empty cell object suitable as a cell reference in

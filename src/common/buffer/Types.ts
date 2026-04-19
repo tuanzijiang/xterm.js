@@ -35,7 +35,7 @@ export interface IBuffer extends ISerializable<IBufferJSONObj>, IDisplaySerializ
   getLength(): number;
   getEffectiveLength(): number;
   getCursorLine(): IBufferLine | undefined;
-  getViewportBottomLine(): IBufferLine | undefined;
+  getViewportBottomLine(): number | undefined;
   addMarker(y: number): IMarker;
   clearMarkers(y: number): void;
   clearAllMarkers(): void;

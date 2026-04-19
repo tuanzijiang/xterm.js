@@ -195,7 +195,7 @@ export interface IBufferJSONObj extends JSONObject {
 
 export interface IBufferDisplayJSONObj extends JSONObject {
   lines: IBufferLineDisplayJSONObj[];
-  viewportBottomLine: IBufferLineDisplayJSONObj | null;
+  viewportBottomLine: number | null;
   effectiveLength: number;
 }
 
